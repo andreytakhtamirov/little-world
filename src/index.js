@@ -23,17 +23,38 @@ var world;
 
 function initializeWorld() {
     scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    scene.background = new THREE.Color('white');
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
     //const renderer = new THREE.CanvasRenderer();
     const renderer = new THREE.WebGLRenderer({antialias: true});
-    renderer.setClearColor("rgb(255,255,255)");
+    //renderer.setClearColor("rgb(255,255,255)");
     const controls = new OrbitControls(camera, renderer.domElement);
-
     renderer.setSize(window.innerWidth, window.innerHeight);
+
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    //Create a DirectionalLight and turn on shadows for the light
+    const light = new THREE.DirectionalLight( 0xffffff, 1.5);
+    light.position.set( 250, 300, 10 );
+    light.castShadow = true;
+    scene.add( light );
+    
+    // set light position
+    light.shadowCameraLeft = -100;
+    light.shadowCameraRight = 100;
+    light.shadowCameraTop = 100;
+    light.shadowCameraBottom = -100;
+
+    // light helper
+    // const helper = new THREE.CameraHelper( light.shadow.camera );
+    // scene.add( helper );
+
+
     document.body.appendChild(renderer.domElement);
-    const worldGeometry = new THREE.BoxGeometry(100, 100, 100);
+    const worldGeometry = new THREE.BoxGeometry(100, 1, 100);
     const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(98,150,103)"}));
-    const grassMaterial = new THREE.MeshBasicMaterial({color: "rgb(11,119,52)"});
+    const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(11,119,52)"});
     world = new THREE.Mesh(worldGeometry, grassMaterial);
 
     let trees = [];
@@ -41,6 +62,8 @@ function initializeWorld() {
     for (let i = 0; i < 100; i++) {
         trees[i] = new Tree();
     }
+
+    world.receiveShadow = true;
 
     scene.add(world);
 
@@ -53,6 +76,7 @@ function initializeWorld() {
     let animate = function () {
         requestAnimationFrame(animate);
         controls.update();
+        light.position.set( camera.position.x, camera.position.y, camera.position.z ); //default; light shining from top
         renderer.render(scene, camera);
     };
     animate();
@@ -61,48 +85,57 @@ function initializeWorld() {
 function Tree() {
     world.add(new Stem().stem);
 
-
     function Stem() {
         const stemWidth = 1;
-        const stemHeight = 4;
+        const stemHeight = Math.random() * (7-3) + 3;
         const stemDepth = 1;
 
-        const stemMaterial = new THREE.MeshBasicMaterial({color: "rgb(62,39,25)"});
+        const stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(62,39,25)"});
         const stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
 
         this.stem = new THREE.Mesh(stemGeometry, stemMaterial);
         const stemLine = new THREE.LineSegments(new THREE.EdgesGeometry(stemGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
 
-        const randomTreePositionX = Math.random() * (45 + 45) - 45;
+        const worldWidth = world.geometry.parameters.width/2;
+        const randomTreePositionX = Math.random() * (worldWidth-5 + worldWidth-5) - (worldWidth-5);
         const treePositionY = world.geometry.parameters.height / 2 + this.stem.geometry.parameters.height / 2;
-        const randomTreePositionZ = Math.random() * (45 + 45) - 45;
+        const randomTreePositionZ = Math.random() * (worldWidth-5 + worldWidth-5) - (worldWidth-5);
 
         this.stem.position.set(randomTreePositionX, treePositionY, randomTreePositionZ);
 
         this.stem.add(stemLine);
 
-        for (let i = 0; i < 4; i++) {
-            this.stem.add(new Leaf().leaf);
+        this.stem.castShadow = true; //default is false
+        this.stem.receiveShadow = false; //default
+
+        for (let i = 0; i < 3; i++) {
+            this.stem.add(new Leaf(this.stem).leaf);
         }
+
+        this.stem.rotation.y = Math.random() * 360;
     }
 
-
-    function Leaf() {
+    function Leaf(stem) {
         const leafWidth = 2;
-        const leafHeight = 1.8;
+        const leafHeight = 2;
         const leafDepth = 2;
 
-        const leafMaterial = new THREE.MeshBasicMaterial({color: "rgb(77,150,49)"});
+        const leafMaterial = new THREE.MeshStandardMaterial({color: "rgb(77,150,49)"});
         const leafGeometry = new THREE.BoxGeometry(leafWidth, leafHeight, leafDepth);
         this.leaf = new THREE.Mesh(leafGeometry, leafMaterial);
         this.leafLine = new THREE.LineSegments(new THREE.EdgesGeometry(leafGeometry), new THREE.LineBasicMaterial({color: "rgb(23,65,9)"}));
 
+        const treeHeight = stem.geometry.parameters.height;
+        const minLeafPosY = treeHeight/2 + 2;
         const randomLeafPositionX = Math.random() * (1+0.5) - 0.5;
-        const randomLeafPositionY = Math.random() * (3-1.5) + 1.5;
+        const randomLeafPositionY = Math.random() * (treeHeight/2 - minLeafPosY) + minLeafPosY;
         const randomLeafPositionZ = Math.random() * (1+0.5) - 0.5;
 
         this.leaf.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
 
+        this.leaf.castShadow = true; //default is false
+        this.leaf.receiveShadow = false; //default
+
         this.leaf.add(this.leafLine);
-    };
+    }
 }
