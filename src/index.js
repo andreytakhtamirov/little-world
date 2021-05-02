@@ -36,15 +36,21 @@ function initializeWorld() {
 
     //Create a DirectionalLight and turn on shadows for the light
     const light = new THREE.DirectionalLight( 0xffffff, 1.5);
-    light.position.set( 250, 300, 10 );
+    light.position.set( 1000, 1500, 1000 );
     light.castShadow = true;
     scene.add( light );
     
     // set light position
-    light.shadowCameraLeft = -100;
-    light.shadowCameraRight = 100;
-    light.shadowCameraTop = 100;
-    light.shadowCameraBottom = -100;
+    light.shadowCameraLeft = -800;
+    light.shadowCameraRight = 800;
+    light.shadowCameraTop = 800;
+    light.shadowCameraBottom = -800;
+
+    //Set up shadow properties for the light
+    light.shadow.mapSize.width = 3000;
+    light.shadow.mapSize.height = 3000;
+    light.shadow.camera.near = 100;
+    light.shadow.camera.far = 2500;
 
     // light helper
     // const helper = new THREE.CameraHelper( light.shadow.camera );
@@ -52,9 +58,9 @@ function initializeWorld() {
 
 
     document.body.appendChild(renderer.domElement);
-    const worldGeometry = new THREE.BoxGeometry(100, 1, 100);
+    const worldGeometry = new THREE.BoxGeometry(100, 10, 100);
     const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(98,150,103)"}));
-    const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(11,119,52)"});
+    const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(112,72,60)"});
     world = new THREE.Mesh(worldGeometry, grassMaterial);
 
     let trees = [];
@@ -67,8 +73,10 @@ function initializeWorld() {
 
     scene.add(world);
 
+    light.target = world;
+
     // cube edge lines
-    scene.add(worldLine);
+    world.add(worldLine);
 
     camera.position.set(120, 120, 80);
     controls.update();
@@ -76,7 +84,11 @@ function initializeWorld() {
     let animate = function () {
         requestAnimationFrame(animate);
         controls.update();
-        light.position.set( camera.position.x, camera.position.y, camera.position.z ); //default; light shining from top
+
+        //light.position.set( light.position.x, light.position.y, light.position.z ); //default; light shining from top
+
+        world.rotation.y += 0.0006;
+
         renderer.render(scene, camera);
     };
     animate();
