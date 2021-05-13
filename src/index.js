@@ -20,6 +20,7 @@ ReactDOM.render(<App/>, rootElement);
 
 var scene;
 var world;
+var world2;
 
 function initializeWorld() {
     scene = new THREE.Scene();
@@ -33,7 +34,105 @@ function initializeWorld() {
 
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
 
+    let light = new Light();
+
+    let worlds = [];
+    const worldsCount = 6;
+
+    for (let i = 0; i < worldsCount + 1; i++) {
+        worlds[i] = new World();
+        if (i === 0) {
+            scene.add(worlds[0]);
+        } else {
+            if (i % 5 === 0) {
+                worlds[i].rotation.x = 180 * Math.PI / 180;
+                worlds[i].position.set(0, -100, 0);
+            } else if (i % 4 === 0) {
+                worlds[i].rotation.z = 270 * Math.PI / 180;
+                worlds[i].position.set(50, -50, 0);
+            } else if (i % 3 === 0) {
+                worlds[i].rotation.x = 90 * Math.PI / 180;
+                worlds[i].position.set(0, -50, 50);
+            } else if (i % 2 === 0) {
+                worlds[i].rotation.z = 90 * Math.PI / 180;
+                worlds[i].position.set(-50, -50, 0);
+            } else if (i % 2 - 1 === 0) {
+                worlds[i].rotation.x = 270 * Math.PI / 180;
+                worlds[i].position.set(0, -50, -50);
+            }
+
+            worlds[0].add(worlds[i]);
+        }
+    }
+
+    world = worlds[0];
+
+    // set the light to always point at world
+    light.target = world;
+
+    const cloudsCount = 0;
+    const rainDropsPerCloud = 30;
+    let clouds = [];
+    let rainDrops = []
+
+    for (let i = 0; i < worldsCount; i++) {
+        const numForests = Math.random() * 4;
+        for (let j = 0; j < numForests; j++) {
+            worlds[i].add(new Forest());
+        }
+
+        for (let j = 0; j < cloudsCount; j++) {
+            clouds[j] = new Cloud();
+            world.add(clouds[j]);
+            for (let k = 0; k < rainDropsPerCloud; k++) {
+                rainDrops[k] = new Rain(clouds[j]);
+            }
+        }
+    }
+
+    camera.position.set(70, 60, 70);
+    controls.update();
+
+    let animate = function () {
+        requestAnimationFrame(animate);
+        controls.update();
+
+        light.position.set(light.position.x, light.position.y, light.position.z); //default; light shining from top
+        light.rotation.y += 80;
+        world.rotation.y += 0.0006;
+
+        if (cloudsCount > 0) {
+
+            for (let i = 0; i < clouds.length; i++) {
+                clouds[i].position.set(clouds[i].position.x + clouds[i].cloudRandomMovementX, clouds[i].position.y, clouds[i].position.x + clouds[i].cloudRandomMovementZ);
+
+                for (let j = 0; j < rainDrops.length; j++) {
+                    const rainDropSpeed = Math.random() * (0.1 + 0.04) - 0.04;
+                    rainDrops[j].rainDrop.position.set(rainDrops[j].rainDrop.position.x, rainDrops[j].rainDrop.position.y - rainDropSpeed, rainDrops[j].rainDrop.position.z);
+                }
+            }
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                if (rainDrops[i].rainDrop.position.y < -30) {
+                    rainDrops[i].rainDrop.position.set(rainDrops[i].positionX, rainDrops[i].positionY, rainDrops[i].positionZ);
+                    for (let i = 0; i < cloudsCount; i++) {
+                        for (let j = 0; j < rainDropsPerCloud; j++) {
+                            rainDrops[j] = new Rain(clouds[i].cloud);
+                        }
+                    }
+                }
+            }
+        }
+
+        renderer.render(scene, camera);
+    };
+    animate();
+}
+
+
+function Light() {
     //Create a DirectionalLight and turn on shadows for the light
     const light = new THREE.DirectionalLight(0xffffff, 1.5);
     const lightDistance = 600;
@@ -53,92 +152,53 @@ function initializeWorld() {
     light.shadow.mapSize.width = 7000;
     light.shadow.mapSize.height = 7000;
     light.shadow.camera.near = 500;
-    light.shadow.camera.far = Math.sqrt(Math.pow(light.position.x, 2) + Math.pow(light.position.y, 2)) + 100;
+    light.shadow.camera.far = Math.sqrt(Math.pow(light.position.x, 2) + Math.pow(light.position.y, 2)) + 300;
 
+    //light helper
+    const helper = new THREE.CameraHelper(light.shadow.camera);
+    scene.add(helper);
 
-    // light helper
-    // const helper = new THREE.CameraHelper(light.shadow.camera);
-    // scene.add(helper);
+    return light;
+}
 
-
-    document.body.appendChild(renderer.domElement);
+function World() {
     const worldGeometry = new THREE.BoxGeometry(100, 10, 100);
     const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(98,150,103)"}));
     const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(112,72,60)"});
-    world = new THREE.Mesh(worldGeometry, grassMaterial);
+    this.world = new THREE.Mesh(worldGeometry, grassMaterial);
 
-    world.receiveShadow = true;
+    this.world.receiveShadow = true;
 
-    world.add(worldLine);
-    scene.add(world);
+    this.world.add(worldLine);
 
-    // set the light to always point at world
-    light.target = world;
+    return this.world;
+}
 
+function Forest() {
+    this.forest = new Tree();
 
-    /////           SPAWN TREES           /////
+    const worldWidth = world.geometry.parameters.width / 2;
+    const positionX = Math.random() * (worldWidth - 12 + worldWidth - 12) - (worldWidth - 12);
+    const positionY = 0;
+    const positionZ = Math.random() * (worldWidth - 12 + worldWidth - 12) - (worldWidth - 12);
 
     // generate 200 trees
-    const treesCount = 200;
+    const treesCount = 30;
 
     let trees = [];
 
     for (let i = 0; i < treesCount; i++) {
         trees[i] = new Tree();
+        this.forest.add(trees[i]);
     }
 
-    /////           SPAWN CLOUDS           /////
-    const cloudsCount = 1;
-    const rainDropsPerCloud = 30;
+    this.forest.position.set(positionX, positionY, positionZ);
 
-    let clouds = [];
-    let rainDrops = []
-    for (let i = 0; i < cloudsCount; i++) {
-        clouds[i] = new Cloud();
-        for (let j = 0; j < rainDropsPerCloud; j++) {
-            rainDrops[j] = new Rain(clouds[i].cloud);
-        }
-    }
-
-    camera.position.set(70, 60, 70);
-    controls.update();
-
-    let animate = function () {
-        requestAnimationFrame(animate);
-        controls.update();
-
-        light.position.set(light.position.x, light.position.y, light.position.z); //default; light shining from top
-        light.rotation.y += 80;
-        world.rotation.y += 0.0006;
-
-        for (let i = 0; i < clouds.length; i++) {
-            clouds[i].cloud.position.set(clouds[i].cloud.position.x + clouds[i].cloudRandomMovementX, clouds[i].cloud.position.y, clouds[i].cloud.position.x + clouds[i].cloudRandomMovementZ);
-
-            for (let j = 0; j < rainDrops.length; j++) {
-                const rainDropSpeed = Math.random() * (0.1 + 0.04) - 0.04;
-                rainDrops[j].rainDrop.position.set(rainDrops[j].rainDrop.position.x, rainDrops[j].rainDrop.position.y - rainDropSpeed, rainDrops[j].rainDrop.position.z);
-            }
-        }
-
-        for (let i = 0; i < rainDrops.length; i++) {
-            if (rainDrops[i].rainDrop.position.y < -30) {
-                rainDrops[i].rainDrop.position.set(rainDrops[i].positionX, rainDrops[i].positionY, rainDrops[i].positionZ);
-                for (let i = 0; i < cloudsCount; i++) {
-                    for (let j = 0; j < rainDropsPerCloud; j++) {
-                        rainDrops[j] = new Rain(clouds[i].cloud);
-                    }
-                }
-            }
-        }
-
-        renderer.render(scene, camera);
-    };
-    animate();
+    return this.forest;
 }
 
-
 function Tree() {
-    world.add(new Stem().stem);
+    return this.stem = new Stem().stem;
 
     function Stem() {
         // tree dimensions
@@ -156,12 +216,11 @@ function Tree() {
         this.stem = new THREE.Mesh(stemGeometry, stemMaterial);
 
         // tree location
-        const worldWidth = world.geometry.parameters.width / 2;
-        const randomTreePositionX = Math.random() * (worldWidth - 5 + worldWidth - 5) - (worldWidth - 5);
-        const treePositionY = world.geometry.parameters.height / 2 + this.stem.geometry.parameters.height / 2;
-        const randomTreePositionZ = Math.random() * (worldWidth - 5 + worldWidth - 5) - (worldWidth - 5);
+        const treePositionX = Math.random() * (10 + 10) - 10;
+        const treePositionY = world.geometry.parameters.height / 2 + this.stem.geometry.parameters.height / 2;;
+        const treePositionZ = Math.random() * (10 + 10) - 10;
 
-        this.stem.position.set(randomTreePositionX, treePositionY, randomTreePositionZ);
+        this.stem.position.set(treePositionX, treePositionY, treePositionZ);
 
         this.stem.add(stemLine);
 
@@ -206,24 +265,26 @@ function Cloud() {
     const cloudWidthHeightDepth = 8;
     const particlesInEachCloud = 10;
 
-    const cloudRotation = Math.random() * (180)
-    const cloudPositionX = Math.random() * (world.geometry.parameters.width / 2 + world.geometry.parameters.width / 2) - world.geometry.parameters.width / 2;
+    const cloudRotation = Math.random() * (180);
+
+    const cloudPositionX = 0;
     const cloudPositionY = 30;
-    const cloudPositionZ = Math.random() * (world.geometry.parameters.depth / 2 + world.geometry.parameters.depth / 2) - world.geometry.parameters.depth / 2;
+    const cloudPositionZ = -100;
 
     this.cloudRandomMovementX = Math.random() * (0.01 + 0.01) - 0.01;
     this.cloudRandomMovementZ = Math.random() * (0.01 + 0.01) - 0.01;
 
     this.cloud = new CloudParticle().cloudParticle;
-    this.cloud.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
 
     for (let i = 0; i < particlesInEachCloud; i++) {
         this.cloud.add(new CloudParticle().cloudParticle);
     }
 
+    this.cloud.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
+
     this.cloud.rotation.y = cloudRotation;
 
-    world.add(this.cloud);
+    return this.cloud;
 
     function CloudParticle() {
         const cloudMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,255,255)"});
@@ -248,7 +309,7 @@ function Cloud() {
 
 
 function Rain(cloud) {
-    this.rainDrop = new RainDrop().rainDrop;
+    this.rainDrop = new RainDrop();
     cloud.add(this.rainDrop);
 
     function RainDrop() {
@@ -267,5 +328,7 @@ function Rain(cloud) {
         this.rainDrop.add(rainDropLine);
 
         this.rainDrop.position.set(positionX, positionY, positionZ);
+
+        return this.rainDrop;
     }
 }
