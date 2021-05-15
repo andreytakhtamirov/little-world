@@ -10,7 +10,9 @@ class App extends Component {
 
     render() {
         return (
-            <div ref={ref => (this.mount = ref)}/>
+            <div ref={(mount) => {
+                this.mount = mount
+            }}/>
         )
     }
 }
@@ -25,21 +27,19 @@ function initializeWorld() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color('black');
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 10000);
-    //const renderer = new THREE.CanvasRenderer();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+
     const renderer = new THREE.WebGLRenderer({antialias: true});
-    //renderer.setClearColor("rgb(255,255,255)");
+
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    document.body.appendChild(renderer.domElement);
+    rootElement.appendChild(renderer.domElement);
 
-    let star1 = new Star(600, 600, 0);
-
-    let star2 = new Star(-800, -900, 100);
+    let star1 = new Star(1800, 1000, 1000);
+    let star2 = new Star(-800, -1900, 100);
 
     let worlds = [];
     const worldsCount = 6;
@@ -77,13 +77,15 @@ function initializeWorld() {
 
     const cloudsCount = 0;
     const rainDropsPerCloud = 30;
+    const treesPerForest = 15;
+
     let clouds = [];
     let rainDrops = []
 
     for (let i = 0; i < worldsCount; i++) {
         const numForests = Math.random() * 4;
         for (let j = 0; j < numForests; j++) {
-            worlds[i].add(new Forest(20));
+            worlds[i].add(new Forest(treesPerForest));
         }
 
         for (let j = 0; j < cloudsCount; j++) {
@@ -95,21 +97,18 @@ function initializeWorld() {
         }
     }
 
-    //camera.position.set(70, 60, 70);
-    camera.position.set(5000, 5000, 5000);
+    camera.position.set(120, 120, 200);
+    //camera.position.set(5000, 5000, 5000);
     controls.update();
 
     let animate = function () {
         requestAnimationFrame(animate);
-        //controls.update();
 
-        //light.position.set(light.position.x, light.position.y, light.position.z); //default; light shining from top
+        //light.position.set(light.position.x, light.position.y, light.position.z);
         //light.rotation.y += 80;
         world.rotation.y += 0.006;
-        star2.rotation.y -= 0.003;
-        star1.rotation.y -= 0.002;
 
-        star1.position.set(star1.position.x, star1.position.y, star1.position.z);
+        //star1.position.set(star1.position.x+=10, star1.position.y+=10, star1.position.z+=10);
 
         if (cloudsCount > 0) {
 
@@ -142,18 +141,19 @@ function initializeWorld() {
 function Star(positionX, positionY, positionZ) {
     const starGeometry = new THREE.BoxGeometry(500, 500, 500);
     const starLine = new THREE.LineSegments(new THREE.EdgesGeometry(starGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
-    const starMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,250,212)"});
+    const starMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,162,0)"});
     this.star = new THREE.Mesh(starGeometry, starMaterial);
 
     this.star.add(starLine);
 
     this.star.castShadow = false;
+    this.star.receiveShadow = false;
 
     new Light(positionX, positionY, positionZ);
 
     this.star.position.set(positionX, positionY, positionZ);
 
-    scene.add(this.star);
+    //scene.add(this.star);
     return this.star;
 }
 
@@ -186,7 +186,7 @@ function Light(positionX, positionY, positionZ) {
 }
 
 function World() {
-    const worldGeometry = new THREE.BoxGeometry(100, 10, 100);
+    const worldGeometry = new THREE.BoxGeometry(100, 1, 100);
     const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(98,150,103)"}));
     const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(112,72,60)"});
     this.world = new THREE.Mesh(worldGeometry, grassMaterial);
@@ -203,17 +203,19 @@ function Forest(treesCount) {
 
     const worldWidth = world.geometry.parameters.width / 2;
     const positionX = Math.random() * (worldWidth - 12 + worldWidth - 12) - (worldWidth - 12);
-    const positionY = 0;
+    const positionY = world.geometry.parameters.height / 2 + this.forest.geometry.parameters.height / 2;
     const positionZ = Math.random() * (worldWidth - 12 + worldWidth - 12) - (worldWidth - 12);
 
     let trees = [];
+
+    this.forest.position.set(positionX, positionY, positionZ);
+
 
     for (let i = 0; i < treesCount; i++) {
         trees[i] = new Tree();
         this.forest.add(trees[i]);
     }
 
-    this.forest.position.set(positionX, positionY, positionZ);
 
     return this.forest;
 }
@@ -238,8 +240,7 @@ function Tree() {
 
         // tree location
         const treePositionX = Math.random() * (10 + 10) - 10;
-        const treePositionY = world.geometry.parameters.height / 2 + this.stem.geometry.parameters.height / 2;
-        ;
+        const treePositionY = 0;
         const treePositionZ = Math.random() * (10 + 10) - 10;
 
         this.stem.position.set(treePositionX, treePositionY, treePositionZ);

@@ -2,10 +2,13 @@
 
 http://inyourownlittleworld.herokuapp.com
 
-#### What's working so far:
+#### What's working so far
 - Orbiting camera
-- Random tree generation/placement
-    - each tree has randomly-placed leaves
+- Random forest generation
 - Randomly-generated clouds with rain droplets
-- Shadows from directional light source
-- World rotates automatically
+- Shadows from 2 directional light sources (stars)
+
+#### Coming soon
+- Lakes/rivers
+- Mountains
+- Grass
