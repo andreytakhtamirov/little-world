@@ -121,7 +121,7 @@ function initializeWorld() {
 
     let animate = function () {
         requestAnimationFrame(animate);
-        stats.update();
+        // stats.update();
         //light.position.set(light.position.x, light.position.y, light.position.z);
         //light.rotation.y += 80;
         //world.rotation.y += 0.006;
