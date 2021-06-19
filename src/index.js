@@ -7,7 +7,7 @@ import Stats from "three/examples/jsm/libs/stats.module";
 
 class App extends Component {
     componentDidMount() {
-        window.addEventListener('resize', onWindowResize);
+        //window.addEventListener('resize', onWindowResize);
         initializeWorld()
     }
 
