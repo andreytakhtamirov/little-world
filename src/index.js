@@ -2,9 +2,12 @@ import React, {Component} from "react";
 import ReactDOM from "react-dom";
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {Geometry} from "three/examples/jsm/deprecated/Geometry";
+import Stats from "three/examples/jsm/libs/stats.module";
 
 class App extends Component {
     componentDidMount() {
+        window.addEventListener('resize', onWindowResize);
         initializeWorld()
     }
 
@@ -22,14 +25,32 @@ ReactDOM.render(<App/>, rootElement);
 
 var scene;
 var world;
+var globalGeometry;
+var camera;
+var renderer;
 
 function initializeWorld() {
+    const worldsCount = 1;
+    const cloudsCount = 1;
+    const rainDropsPerCloud = 30;
+    const maxNumOfForests = 3;
+    const treesPerForest = 15;
+
+    let worlds = [];
+    let clouds = [];
+    let rainDrops = [];
+
     scene = new THREE.Scene();
     scene.background = new THREE.Color('black');
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-    const renderer = new THREE.WebGLRenderer({antialias: true});
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+
+    renderer = new THREE.WebGLRenderer({antialias: true});
+
+    let stats = new Stats();
+    document.body.appendChild(stats.dom);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -38,13 +59,14 @@ function initializeWorld() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rootElement.appendChild(renderer.domElement);
 
-    let star1 = new Star(1800, 1000, 1000);
-    let star2 = new Star(-800, -1900, 100);
+    let star1 = new Star(1800, 1000, 1000, 500, 2.2);
+    let star2 = new Star(-800, -1900, 100, 200, 2);
 
-    let worlds = [];
-    const worldsCount = 6;
+    //let moon = new Moon(1000, 0, 1000, 100);
 
-    for (let i = 0; i < worldsCount + 1; i++) {
+    globalGeometry = new Geometry();
+
+    for (let i = 0; i < worldsCount; i++) {
         worlds[i] = new World();
         if (i === 0) {
             scene.add(worlds[0]);
@@ -72,28 +94,21 @@ function initializeWorld() {
 
     world = worlds[0];
 
-    // set the light to always point at world
-    //light.target = world;
-
-    const cloudsCount = 0;
-    const rainDropsPerCloud = 30;
-    const treesPerForest = 15;
-
-    let clouds = [];
-    let rainDrops = []
-
     for (let i = 0; i < worldsCount; i++) {
-        const numForests = Math.random() * 4;
+        const numForests = Math.random() * maxNumOfForests;
         for (let j = 0; j < numForests; j++) {
-            worlds[i].add(new Forest(treesPerForest));
+            worlds[i].add(new Forest(treesPerForest - 1));
         }
 
-        for (let j = 0; j < cloudsCount; j++) {
-            clouds[j] = new Cloud();
-            world.add(clouds[j]);
-            for (let k = 0; k < rainDropsPerCloud; k++) {
-                rainDrops[k] = new Rain(clouds[j]);
-            }
+        let cloudsPerWorld = 1;
+        //randomInteger(0, 2)
+
+        for (let j = 0; j < cloudsPerWorld; j++) {
+            clouds[i + j] = new Cloud();
+            worlds[i].add(clouds[i + j]);
+            // for (let k = 0; k < rainDropsPerCloud; k++) {
+            //     rainDrops[k] = new Rain(clouds[j]);
+            // }
         }
     }
 
@@ -101,36 +116,43 @@ function initializeWorld() {
     //camera.position.set(5000, 5000, 5000);
     controls.update();
 
+    const cloudRandomMovementX = Math.random() * (0.01 + 0.01) - 0.01;
+    const cloudRandomMovementZ = Math.random() * (0.01 + 0.01) - 0.01;
+
     let animate = function () {
         requestAnimationFrame(animate);
-
+        stats.update();
         //light.position.set(light.position.x, light.position.y, light.position.z);
         //light.rotation.y += 80;
-        world.rotation.y += 0.006;
+        //world.rotation.y += 0.006;
+
+        //moon.rotation.y -= 0.02;
+        // star1.rotation.y += 0.007
+        // star2.rotation.y -= 0.007
 
         //star1.position.set(star1.position.x+=10, star1.position.y+=10, star1.position.z+=10);
 
-        if (cloudsCount > 0) {
+        if (clouds.length > 0) {
 
-            for (let i = 0; i < clouds.length; i++) {
-                clouds[i].position.set(clouds[i].position.x + clouds[i].cloudRandomMovementX, clouds[i].position.y, clouds[i].position.x + clouds[i].cloudRandomMovementZ);
+            for (let i = 0; i < clouds.length - 1; i++) {
+                clouds[i].position.set(clouds[i].position.x + cloudRandomMovementX, clouds[i].position.y, clouds[i].position.z + cloudRandomMovementZ);
 
-                for (let j = 0; j < rainDrops.length; j++) {
-                    const rainDropSpeed = Math.random() * (0.1 + 0.04) - 0.04;
-                    rainDrops[j].rainDrop.position.set(rainDrops[j].rainDrop.position.x, rainDrops[j].rainDrop.position.y - rainDropSpeed, rainDrops[j].rainDrop.position.z);
-                }
+                // for (let j = 0; j < rainDrops.length; j++) {
+                //     const rainDropSpeed = Math.random() * (0.1 + 0.04) - 0.04;
+                //     rainDrops[j].rainDrop.position.set(rainDrops[j].rainDrop.position.x, rainDrops[j].rainDrop.position.y - rainDropSpeed, rainDrops[j].rainDrop.position.z);
+                // }
             }
 
-            for (let i = 0; i < rainDrops.length; i++) {
-                if (rainDrops[i].rainDrop.position.y < -30) {
-                    rainDrops[i].rainDrop.position.set(rainDrops[i].positionX, rainDrops[i].positionY, rainDrops[i].positionZ);
-                    for (let i = 0; i < cloudsCount; i++) {
-                        for (let j = 0; j < rainDropsPerCloud; j++) {
-                            rainDrops[j] = new Rain(clouds[i].cloud);
-                        }
-                    }
-                }
-            }
+            // for (let i = 0; i < rainDrops.length; i++) {
+            //     if (rainDrops[i].rainDrop.position.y < -30) {
+            //         rainDrops[i].rainDrop.position.set(rainDrops[i].positionX, rainDrops[i].positionY, rainDrops[i].positionZ);
+            //         for (let i = 0; i < cloudsCount; i++) {
+            //             for (let j = 0; j < rainDropsPerCloud; j++) {
+            //                 rainDrops[j] = new Rain(clouds[i].cloud);
+            //             }
+            //         }
+            //     }
+            // }
         }
 
         renderer.render(scene, camera);
@@ -138,10 +160,11 @@ function initializeWorld() {
     animate();
 }
 
-function Star(positionX, positionY, positionZ) {
-    const starGeometry = new THREE.BoxGeometry(500, 500, 500);
+function Star(positionX, positionY, positionZ, size, intensity) {
+    const starGeometry = new THREE.BoxGeometry(size, size, size);
     const starLine = new THREE.LineSegments(new THREE.EdgesGeometry(starGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
-    const starMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,162,0)"});
+    const starMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,129,22)"});
+
     this.star = new THREE.Mesh(starGeometry, starMaterial);
 
     this.star.add(starLine);
@@ -149,23 +172,39 @@ function Star(positionX, positionY, positionZ) {
     this.star.castShadow = false;
     this.star.receiveShadow = false;
 
-    new Light(positionX, positionY, positionZ);
+    new Light(positionX, positionY, positionZ, intensity);
 
     this.star.position.set(positionX, positionY, positionZ);
 
-    //scene.add(this.star);
+    scene.add(this.star);
     return this.star;
 }
 
-function Light(positionX, positionY, positionZ) {
+function Moon(positionX, positionY, positionZ, size) {
+    const moonGeometry = new THREE.BoxGeometry(size, size, size);
+    const moonLine = new THREE.LineSegments(new THREE.EdgesGeometry(moonGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
+    const moonMaterial = new THREE.MeshStandardMaterial({color: "rgb(123,123,121)"});
+    this.moon = new THREE.Mesh(moonGeometry, moonMaterial);
+
+    this.moon.add(moonLine);
+
+    this.moon.castShadow = false;
+    this.moon.receiveShadow = false;
+
+    this.moon.position.set(positionX, positionY, positionZ);
+
+    return this.moon;
+}
+
+function Light(positionX, positionY, positionZ, intensity) {
     //Create a DirectionalLight and turn on shadows for the light
-    const light = new THREE.DirectionalLight(0xffffff, 1.1);
+    const light = new THREE.DirectionalLight(0xffffff, intensity);
 
     light.position.set(positionX, positionY, positionZ);
     light.castShadow = true
     scene.add(light);
 
-    const lightArea = 800;
+    const lightArea = 120;
     // set light position
     light.shadowCameraLeft = -lightArea;
     light.shadowCameraRight = lightArea;
@@ -179,7 +218,7 @@ function Light(positionX, positionY, positionZ) {
     light.shadow.camera.far = Math.sqrt(Math.pow(light.position.x, 2) + Math.pow(light.position.y, 2)) + Math.abs(light.position.x);
 
     //light helper
-    const helper = new THREE.CameraHelper(light.shadow.camera);
+    //const helper = new THREE.CameraHelper(light.shadow.camera);
     //scene.add(helper);
 
     return light;
@@ -187,8 +226,8 @@ function Light(positionX, positionY, positionZ) {
 
 function World() {
     const worldGeometry = new THREE.BoxGeometry(100, 1, 100);
-    const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(98,150,103)"}));
-    const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(112,72,60)"});
+    const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(71,47,37)"}));
+    const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(54,85,48)"});
     this.world = new THREE.Mesh(worldGeometry, grassMaterial);
 
     this.world.receiveShadow = true;
@@ -199,7 +238,7 @@ function World() {
 }
 
 function Forest(treesCount) {
-    this.forest = new Tree();
+    this.forest = new Tree(0);
 
     const worldWidth = world.geometry.parameters.width / 2;
     const positionX = Math.random() * (worldWidth - 12 + worldWidth - 12) - (worldWidth - 12);
@@ -212,7 +251,7 @@ function Forest(treesCount) {
 
 
     for (let i = 0; i < treesCount; i++) {
-        trees[i] = new Tree();
+        trees[i] = new Tree(-positionY);
         this.forest.add(trees[i]);
     }
 
@@ -220,30 +259,78 @@ function Forest(treesCount) {
     return this.forest;
 }
 
-function Tree() {
-    return new Stem().stem;
+// function Mountain() {
+//     const widthHeightDepth = 2;
+//     const MOUNTAIN_SIZE = 5;
+//
+//     const mountainRotation = Math.random() * (18);
+//
+//     const cloudPositionX = 0;
+//     const cloudPositionY = 30;
+//     const cloudPositionZ = -100;
+//
+//     this.cloudRandomMovementX = Math.random() * (0.01 + 0.01) - 0.01;
+//     this.cloudRandomMovementZ = Math.random() * (0.01 + 0.01) - 0.01;
+//
+//     this.mountain = new MountainParticle().cloudParticle;
+//
+//     for (let i = 0; i < MOUNTAIN_SIZE; i++) {
+//         this.mountain.add(new MountainParticle());
+//     }
+//
+//     this.mountain.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
+//
+//     return this.mountain;
+//
+//     function MountainParticle() {
+//         const mountainMaterial = new THREE.MeshStandardMaterial({color: "rgb(64,64,64)"});
+//         const mountainGeometry = new THREE.BoxGeometry(widthHeightDepth, widthHeightDepth, widthHeightDepth);
+//         const mountainLine = new THREE.LineSegments(new THREE.EdgesGeometry(mountainGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
+//
+//         this.block = new THREE.Mesh(mountainGeometry, mountainMaterial);
+//
+//         // set mountain to cast a shadow
+//         this.block.castShadow = true;
+//
+//         this.block.add(mountainLine);
+//
+//         const particlePositionX = Math.random() * (8 + 4) - 4;
+//         const particlePositionY = Math.random() * (8 + 4) - 4;
+//         const particlePositionZ = Math.random() * (8 + 4) - 4;
+//
+//         this.block.position.set(particlePositionX, particlePositionY, particlePositionZ);
+//
+//         return this.block;
+//     }
+// }
 
-    function Stem() {
+function Tree(yOffset) {
+
+    return new Stem(yOffset);
+
+    function Stem(yOffset) {
         // tree dimensions
         const stemWidth = 1;
-        const stemHeight = Math.random() * (7 - 3) + 3;
+        const stemHeight = Math.random() * (8 - 3) + 3;
         const stemDepth = 1;
 
         // how many leaves are in each tree
         const leavesInTree = 3;
 
-        const stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(62,39,25)"});
-        const stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
-        const stemLine = new THREE.LineSegments(new THREE.EdgesGeometry(stemGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
+        let stemMaterial = new THREE.MeshStandardMaterial({color:"rgb(62,39,25)"});
+        let stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
+
+        let stemLineMaterial = new THREE.LineBasicMaterial({color:"rgb(43,28,28)"});
+        let stemLine = new THREE.LineSegments(new THREE.EdgesGeometry(stemGeometry), stemLineMaterial);
 
         this.stem = new THREE.Mesh(stemGeometry, stemMaterial);
 
         // tree location
         const treePositionX = Math.random() * (10 + 10) - 10;
-        const treePositionY = 0;
+        const treePositionY = world.geometry.parameters.height / 2 + this.stem.geometry.parameters.height / 2;
         const treePositionZ = Math.random() * (10 + 10) - 10;
 
-        this.stem.position.set(treePositionX, treePositionY, treePositionZ);
+        this.stem.position.set(treePositionX, treePositionY + yOffset, treePositionZ);
 
         this.stem.add(stemLine);
 
@@ -251,10 +338,12 @@ function Tree() {
         this.stem.castShadow = true;
 
         for (let i = 0; i < leavesInTree; i++) {
-            this.stem.add(new Leaf(this.stem).leaf);
+            this.stem.add(new Leaf(this.stem));
         }
 
         this.stem.rotation.y = Math.random() * 360;
+
+        return this.stem;
     }
 
     function Leaf(stem) {
@@ -263,39 +352,35 @@ function Tree() {
 
         // leaf positions
         const treeHeight = stem.geometry.parameters.height;
-        const minLeafPosY = treeHeight / 2 + leafWidthHeightDepth;
+        const minLeafPosY = treeHeight / 2 - leafWidthHeightDepth / 2;
         const randomLeafPositionX = Math.random() * (leafWidthHeightDepth / 2 + leafWidthHeightDepth / 4) - leafWidthHeightDepth / 4;
         const randomLeafPositionY = Math.random() * (treeHeight / 2 - minLeafPosY) + minLeafPosY;
         const randomLeafPositionZ = Math.random() * (leafWidthHeightDepth / 2 + leafWidthHeightDepth / 4) - leafWidthHeightDepth / 4;
 
+        let leafMaterial = new THREE.MeshStandardMaterial({color:"rgb(79, 121, 59)"});
+        let leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
-        const leafMaterial = new THREE.MeshStandardMaterial({color: "rgb(77,150,49)"});
-        const leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
-        const leafLine = new THREE.LineSegments(new THREE.EdgesGeometry(leafGeometry), new THREE.LineBasicMaterial({color: "rgb(23,65,9)"}));
+        let leafLineMaterial = new THREE.LineBasicMaterial({color:"rgb(35, 80, 22)"});
+        let leafLine = new THREE.LineSegments(new THREE.EdgesGeometry(leafGeometry), leafLineMaterial);
 
         this.leaf = new THREE.Mesh(leafGeometry, leafMaterial);
+        this.leaf.add(leafLine);
 
         this.leaf.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
 
-        // set leaf to cast a shadow
-        this.leaf.castShadow = true;
-
-        this.leaf.add(leafLine);
+        return this.leaf;
     }
 }
 
 function Cloud() {
     const cloudWidthHeightDepth = 8;
-    const particlesInEachCloud = 10;
+    const particlesInEachCloud = 2;
 
     const cloudRotation = Math.random() * (180);
 
-    const cloudPositionX = 0;
-    const cloudPositionY = 30;
-    const cloudPositionZ = -100;
-
-    this.cloudRandomMovementX = Math.random() * (0.01 + 0.01) - 0.01;
-    this.cloudRandomMovementZ = Math.random() * (0.01 + 0.01) - 0.01;
+    const cloudPositionX = Math.random() * (world.geometry.parameters.width / 2 - cloudWidthHeightDepth) + 1;
+    const cloudPositionY = 20;
+    const cloudPositionZ = Math.random() * (world.geometry.parameters.width / 2 - cloudWidthHeightDepth) + 1;
 
     this.cloud = new CloudParticle().cloudParticle;
 
@@ -310,26 +395,25 @@ function Cloud() {
     return this.cloud;
 
     function CloudParticle() {
-        const cloudMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,255,255)"});
+        const cloudMaterial = new THREE.MeshStandardMaterial({color: "rgb(213,213,213)"});
         const cloudGeometry = new THREE.BoxGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
 
         this.cloudParticle = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
-        const cloudLine = new THREE.LineSegments(new THREE.EdgesGeometry(cloudGeometry), new THREE.LineBasicMaterial({color: "rgb(64,64,64)"}));
+        const cloudLine = new THREE.LineSegments(new THREE.EdgesGeometry(cloudGeometry), new THREE.LineBasicMaterial({color: "rgb(170,170,170)"}));
 
         // set cloud to cast a shadow
         this.cloudParticle.castShadow = true;
 
         this.cloudParticle.add(cloudLine);
 
-        const particlePositionX = Math.random() * (8 + 4) - 4;
-        const particlePositionY = Math.random() * (8 + 4) - 4;
-        const particlePositionZ = Math.random() * (8 + 4) - 4;
+        const particlePositionX = Math.random() * randomNumber(4, 8);
+        const particlePositionY = Math.random() * randomNumber(4, 8);
+        const particlePositionZ = Math.random() * randomNumber(4, 8);
 
         this.cloudParticle.position.set(particlePositionX, particlePositionY, particlePositionZ);
     }
 }
-
 
 function Rain(cloud) {
     this.rainDrop = new RainDrop();
@@ -344,14 +428,29 @@ function Rain(cloud) {
         const rainDropMaterial = new THREE.MeshStandardMaterial({color: "rgb(107,201,255)"});
         const rainDropGeometry = new THREE.BoxGeometry(rainDropWidthHeightDepth, rainDropWidthHeightDepth, rainDropWidthHeightDepth);
 
-        this.rainDrop = new THREE.Mesh(rainDropGeometry, rainDropMaterial);
+        this.rain = new THREE.Mesh(rainDropGeometry, rainDropMaterial);
 
         const rainDropLine = new THREE.LineSegments(new THREE.EdgesGeometry(rainDropGeometry), new THREE.LineBasicMaterial({color: "rgb(1,45,116)"}));
 
-        this.rainDrop.add(rainDropLine);
+        this.rain.add(rainDropLine);
 
-        this.rainDrop.position.set(positionX, positionY, positionZ);
+        this.rain.position.set(positionX, positionY, positionZ);
 
-        return this.rainDrop;
+        return this.rain;
     }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function randomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function randomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
