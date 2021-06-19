@@ -49,8 +49,8 @@ function initializeWorld() {
 
     renderer = new THREE.WebGLRenderer({antialias: true});
 
-    let stats = new Stats();
-    document.body.appendChild(stats.dom);
+    // let stats = new Stats();
+    // document.body.appendChild(stats.dom);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
