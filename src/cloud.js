@@ -6,10 +6,10 @@ export default class Cloud {
         const cloudWidthHeightDepth = Utils.randomNumber(2, 5);
         const particlesInEachCloud = 3;
 
-        const cloudRotation = Math.random() * (180);
-        const cloudPositionX = Math.random() * (worldReference.geometry.parameters.width / 2 - cloudWidthHeightDepth) + 1;
+        const cloudRotation = Math.random() * (360);
+        const cloudPositionX = Utils.randomNumber((-worldReference.geometry.parameters.width / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.width / 2) - cloudWidthHeightDepth);
         const cloudPositionY = Utils.randomNumber(10, 15);
-        const cloudPositionZ = Math.random() * (worldReference.geometry.parameters.width / 2 - cloudWidthHeightDepth) + 1;
+        const cloudPositionZ = Utils.randomNumber((-worldReference.geometry.parameters.depth / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.depth / 2) - cloudWidthHeightDepth);
 
         this.cloudParticle = new CloudParticle(cloudWidthHeightDepth);
         cloudParticles[0] = this.cloudParticle.mesh;
