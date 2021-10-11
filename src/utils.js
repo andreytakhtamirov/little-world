@@ -10,7 +10,7 @@ export default class Utils {
     static create2dArray(rows) {
         let array = [];
 
-        for (let i = 0; i < rows; i++) {
+        for (let i = 0; i < rows + 1; i++) {
             array[i] = [];
         }
         return array;

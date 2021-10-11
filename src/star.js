@@ -39,9 +39,5 @@ class Light {
         this.light.shadow.mapSize.height = 7000;
         this.light.shadow.camera.near = 500;
         this.light.shadow.camera.far = Math.sqrt(Math.pow(this.light.position.x, 2) + Math.pow(this.light.position.y, 2)) + Math.abs(this.light.position.x);
-
-        //light helper
-        //const helper = new THREE.CameraHelper(light.shadow.camera);
-        //scene.add(helper);
     }
 }
