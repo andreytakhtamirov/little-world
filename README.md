@@ -1,6 +1,6 @@
 # little-world
 
-http://inyourownlittleworld.herokuapp.com
+https://inyourownlittleworld.herokuapp.com
 
 #### What's working so far
 - Orbiting camera
