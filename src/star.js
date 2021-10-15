@@ -1,27 +1,26 @@
 import * as THREE from "three";
 
 export default class Star {
-    constructor(positionX, positionY, positionZ, size, intensity) {
+    constructor(worldReference, positionX, positionY, positionZ, size, intensity) {
         const starGeometry = new THREE.BoxGeometry(size, size, size);
         const starLine = new THREE.LineSegments(new THREE.EdgesGeometry(starGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
         const starMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,129,22)"});
 
         this.mesh = new THREE.Mesh(starGeometry, starMaterial);
-
         this.mesh.add(starLine);
 
         this.mesh.castShadow = false;
         this.mesh.receiveShadow = false;
 
         // Star will emit light from its position
-        this.light = new Light(positionX, positionY, positionZ, intensity).light;
+        this.light = new Light(worldReference, positionX, positionY, positionZ, intensity).light;
         this.mesh.position.set(positionX, positionY, positionZ);
     }
 }
 
 class Light {
-    constructor(positionX, positionY, positionZ, intensity) {
-        const lightArea = 120;
+    constructor(worldReference, positionX, positionY, positionZ, intensity) {
+        const lightArea = worldReference.geometry.parameters.width / 2;
 
         //Create a DirectionalLight and turn on shadows for the light
         this.light = new THREE.DirectionalLight(0xffffff, intensity);
@@ -35,9 +34,12 @@ class Light {
         this.light.shadowCameraBottom = -lightArea;
 
         //Set up shadow properties for the light
-        this.light.shadow.mapSize.width = 7000;
-        this.light.shadow.mapSize.height = 7000;
-        this.light.shadow.camera.near = 500;
-        this.light.shadow.camera.far = Math.sqrt(Math.pow(this.light.position.x, 2) + Math.pow(this.light.position.y, 2)) + Math.abs(this.light.position.x);
+        this.light.shadow.mapSize.width = Math.pow(worldReference.geometry.parameters.width, 2);
+        this.light.shadow.mapSize.height = Math.pow(worldReference.geometry.parameters.depth, 2);
+        this.light.shadow.camera.far =
+            Math.sqrt(Math.pow(this.light.position.x, 2)
+                + Math.pow(this.light.position.y, 2)
+                + Math.pow(this.light.position.z, 2))
+            + worldReference.geometry.parameters.width;
     }
 }

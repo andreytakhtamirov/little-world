@@ -11,6 +11,6 @@ export default class World {
         const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(54,85,48)"});
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
         this.mesh.receiveShadow = true;
-        this.mesh.add(worldLine);
+        //this.mesh.add(worldLine);
     }
 }

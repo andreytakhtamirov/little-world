@@ -3,6 +3,9 @@ import Utils from "./utils";
 
 export default class Cloud {
     constructor(cloudParticles, worldReference) {
+        this.cloudRandomMovementX = Utils.randomNumber(-0.001, 0.001);
+        this.cloudRandomMovementY = Utils.randomNumber(-0.001, 0.001);
+        this.cloudRandomMovementZ = Utils.randomNumber(-0.001, 0.001);
         const cloudWidthHeightDepth = Utils.randomNumber(2, 5);
         const particlesInEachCloud = 3;
 
@@ -23,14 +26,12 @@ export default class Cloud {
 
         this.mesh.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
         this.mesh.rotation.y = cloudRotation;
-
-        return this.mesh;
     }
 }
 
 class CloudParticle {
     constructor(cloudWidthHeightDepth) {
-        const cloudMaterial = new THREE.MeshLambertMaterial({color: "rgb(213,213,213)"});
+        const cloudMaterial = new THREE.MeshStandardMaterial({color: "rgb(213,213,213)"});
         const cloudGeometry = new THREE.BoxGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
 
         this.mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
@@ -41,7 +42,7 @@ class CloudParticle {
         this.mesh.castShadow = true;
 
         // Hide cloud outline to save memory!!
-        //this.cloudParticle.add(cloudLine);
+        //this.mesh.add(cloudLine);
 
         const particlePositionX = Math.random() * Utils.randomNumber(cloudWidthHeightDepth / 2, cloudWidthHeightDepth);
         const particlePositionY = Math.random() * Utils.randomNumber(cloudWidthHeightDepth / 2, cloudWidthHeightDepth);
@@ -50,6 +51,7 @@ class CloudParticle {
         this.mesh.position.set(particlePositionX, particlePositionY, particlePositionZ);
 
         this.mesh.material.transparent = true;
-        this.mesh.material.opacity = 0.9;
+        this.mesh.material.opacity = Utils.randomNumber(0.3, 0.9);
+        this.mesh.renderOrder = 2;
     }
 }

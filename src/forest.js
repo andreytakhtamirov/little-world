@@ -30,7 +30,7 @@ class Tree {
         const stemHeight = randDimension;
         const stemDepth = stemWidth;    // Tree trunk will be square-based
 
-        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(62,35,25)"});
+        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(42,23,13)"});
         let stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
 
         let stemLineMaterial = new THREE.LineBasicMaterial({color: "rgb(43,28,28)"});
@@ -51,6 +51,7 @@ class Tree {
             this.mesh.add(new Leaf(this.mesh).mesh);
         }
         this.mesh.rotation.y = Math.random() * 360;
+        this.mesh.renderOrder = 1;
     }
 }
 
@@ -74,7 +75,7 @@ class Leaf {
         const randomLeafPositionZ = Math.random() * (leafWidthHeightDepth / 2 + leafWidthHeightDepth / 4) - leafWidthHeightDepth / 4;
 
         let randomColour = new THREE.Color(leafColours[(Utils.randomInteger(0, leafColours.length - 1))]);
-        let leafMaterial = new THREE.MeshLambertMaterial({color: randomColour});
+        let leafMaterial = new THREE.MeshStandardMaterial({color: randomColour});
 
         let leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
