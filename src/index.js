@@ -3,17 +3,13 @@ import ReactDOM from "react-dom";
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import Star from "./star"
-import Moon from "./moon";
 import Forest from "./forest";
 import Utils from "./utils";
 import Cloud from "./cloud";
-import Rain from "./rain";
 import World from "./world";
 import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import Stats from "three/examples/jsm/libs/stats.module";
 import * as Constants from "./constants";
 
 class App extends Component {
@@ -46,13 +42,14 @@ function initializeWorld() {
 
     let worlds = [];
     let clouds = [];
-    let cloudParticles = Utils.create2dArray(Constants.CloudsCount);
+    let grove = [];
     let rainDrops = [];
 
-    let initialCloudParticleLocation = Utils.create2dArray(Constants.CloudsCount);
-    let cloudParticleMovement = Utils.create2dArray(Constants.CloudsCount);
-    let lastMovement = Utils.create2dArray(Constants.CloudsCount);
-    let moveCounter = 0;
+    let initialCloudParticleLocation = Utils.create2dArray(Constants.Cloud.Count);
+    let cloudParticleMovement = Utils.create2dArray(Constants.Cloud.Count);
+    let lastMovement = Utils.create2dArray(Constants.Cloud.Count);
+    let cloudParticleMoveCounter = 0;
+    let leafMoveCounter = 0;
     let moveForward = true;
 
     scene = new THREE.Scene();
@@ -68,7 +65,7 @@ function initializeWorld() {
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor();
-    renderer.setPixelRatio(window.devicePixelRatio * 0.40);
+    renderer.setPixelRatio(window.devicePixelRatio * Constants.ResolutionRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     rootElement.appendChild(renderer.domElement);
@@ -90,32 +87,32 @@ function initializeWorld() {
     composer.addPass(bloomPass)
 
     // Set up plane orientation (for a 1-6 sided earth)
-    for (let i = 0; i < Constants.WorldSidesCount; i++) {
-        worlds[i] = new World().mesh;
+    for (let i = 0; i < Constants.World.SidesCount; i++) {
+        worlds[i] = new World();
         if (i === 0) {
-            scene.add(worlds[0]);
+            scene.add(worlds[0].mesh);
         } else {
             if (i % 5 === 0) {
-                worlds[i].rotation.x = 180 * Math.PI / 180;
-                worlds[i].position.set(0, -100, 0);
+                worlds[i].mesh.rotation.x = 180 * Math.PI / 180;
+                worlds[i].mesh.position.set(0, -100, 0);
             } else if (i % 4 === 0) {
-                worlds[i].rotation.z = 270 * Math.PI / 180;
-                worlds[i].position.set(50, -50, 0);
+                worlds[i].mesh.rotation.z = 270 * Math.PI / 180;
+                worlds[i].mesh.position.set(50, -50, 0);
             } else if (i % 3 === 0) {
-                worlds[i].rotation.x = 90 * Math.PI / 180;
-                worlds[i].position.set(0, -50, 50);
+                worlds[i].mesh.rotation.x = 90 * Math.PI / 180;
+                worlds[i].mesh.position.set(0, -50, 50);
             } else if (i % 2 === 0) {
-                worlds[i].rotation.z = 90 * Math.PI / 180;
-                worlds[i].position.set(-50, -50, 0);
+                worlds[i].mesh.rotation.z = 90 * Math.PI / 180;
+                worlds[i].mesh.position.set(-50, -50, 0);
             } else if (i % 2 - 1 === 0) {
-                worlds[i].rotation.x = 270 * Math.PI / 180;
-                worlds[i].position.set(0, -50, -50);
+                worlds[i].mesh.rotation.x = 270 * Math.PI / 180;
+                worlds[i].mesh.position.set(0, -50, -50);
             }
-            worlds[0].add(worlds[i]);
+            worlds[0].mesh.add(worlds[i].mesh);
         }
     }
 
-    worldReference = worlds[0];
+    worldReference = worlds[0].mesh;
 
     let star1 = new Star(worldReference, 1800, 1000, 1000, 500, 1.8);
     let star2 = new Star(worldReference, -800, -1900, 100, 200, 2);
@@ -135,15 +132,17 @@ function initializeWorld() {
     // scene.add(helper2);
 
     // Set up forests, clouds, and rain for each world plane
-    for (let i = 0; i < Constants.WorldSidesCount; i++) {
-        const numForests = Utils.randomInteger(Constants.MinNumOfForests, Constants.MaxNumOfForests)
-        for (let j = 0; j < numForests; j++) {
-            worlds[i].add(new Forest(Constants.TreesPerForest - 1, worldReference).mesh);
+    for (let i = 0; i < Constants.World.SidesCount; i++) {
+        for (let j = 0; j < worlds[i].numForests; j++) {
+            let forest = new Forest(Constants.Forest.TreesCount - 1, worldReference);
+            grove[j] = forest.trees;
+
+            worlds[i].mesh.add(forest.mesh);
         }
 
-        for (let j = 0; j < Constants.CloudsCount; j++) {
-            clouds[i + j] = new Cloud(cloudParticles[j], worldReference);
-            worlds[i].add(clouds[i + j].mesh);
+        for (let j = 0; j < Constants.Cloud.Count; j++) {
+            clouds[i + j] = new Cloud(worldReference);
+            worlds[i].mesh.add(clouds[i + j].mesh);
             // for (let k = 0; k < rainDropsPerCloud; k++) {
             //     rainDrops[k] = new Rain().mesh;
             //     clouds[j].add(rainDrops[k]);
@@ -152,12 +151,11 @@ function initializeWorld() {
     }
     camera.position.set(40, 25, 50); // Camera position for small earth (50x50)
     //camera.position.set(120, 120, 200); // Camera position for medium earth (100x100)
-    // camera.position.set(5000, 5000, 5000); // Camera position for huge earth
+    //camera.position.set(5000, 5000, 5000); // Camera position for huge earth (1000x1000)
     controls.update();
 
-    for (let i = 0; i < Constants.CloudsCount; i++) {
-        cloudParticleMovementLoop[i] = Utils.randomInteger(1, Constants.CloudParticleMoveTimeOut);
-        setCloudParticleMovement(cloudParticleMovement[i], Constants.CloudParticleMovementSpeed);
+    for (let i = 0; i < clouds.length; i++) {
+        cloudParticleMovementLoop[i] = Utils.randomInteger(1, Constants.Cloud.ParticleMoveTimeOut);
     }
 
     let animate = function () {
@@ -170,64 +168,89 @@ function initializeWorld() {
 
         // ---------------- WORLD MOVEMENT ---------------- //
         //world.rotation.y += 0.006;
-
         // ---------------- OTHER PLANET MOVEMENT ---------------- //
         //moon.rotation.y -= 0.02;
         // star1.rotation.y += 0.007
         // star2.rotation.y -= 0.007
         // star1.position.set(star1.position.x+=10, star1.position.y+=10, star1.position.z+=10);
 
-        if (clouds.length > 0) {
-            // ---------------- WHOLE CLOUD MOVEMENT ---------------- //
-            for (let i = 0; i < clouds.length; i++) {
-                clouds[i].mesh.translateX(clouds[i].cloudRandomMovementX);
-                clouds[i].mesh.translateY(clouds[i].cloudRandomMovementY);
-                clouds[i].mesh.translateZ(clouds[i].cloudRandomMovementZ);
+        // ---------------- WHOLE CLOUD MOVEMENT ---------------- //
+        for (let i = 0; i < clouds.length; i++) {
+            clouds[i].mesh.translateX(clouds[i].cloudRandomMovementX);
+            clouds[i].mesh.translateY(clouds[i].cloudRandomMovementY);
+            clouds[i].mesh.translateZ(clouds[i].cloudRandomMovementZ);
 
-                if (clouds[i].mesh.position.x > worlds[0].geometry.parameters.width / 2 ||
-                    clouds[i].mesh.position.x < -worlds[0].geometry.parameters.width / 2 ||
-                    clouds[i].mesh.position.y > 20 ||
-                    clouds[i].mesh.position.y < 5 ||
-                    clouds[i].mesh.position.z > worlds[0].geometry.parameters.depth / 2 ||
-                    clouds[i].mesh.position.z < -worlds[0].geometry.parameters.depth / 2) {
+            if (clouds[i].mesh.position.x > worlds[0].mesh.geometry.parameters.width / 2 ||
+                clouds[i].mesh.position.x < -worlds[0].mesh.geometry.parameters.width / 2 ||
+                clouds[i].mesh.position.y > 20 ||
+                clouds[i].mesh.position.y < 10 ||
+                clouds[i].mesh.position.z > worlds[0].mesh.geometry.parameters.depth / 2 ||
+                clouds[i].mesh.position.z < -worlds[0].mesh.geometry.parameters.depth / 2) {
 
-                    worlds[0].remove(clouds[i].mesh);
-                    clouds[i].mesh.geometry.dispose();
-                    clouds[i].mesh.material.dispose();
-                    clouds[i] = new Cloud(cloudParticles, worldReference);
-                    worlds[0].add(clouds[i].mesh);
-                    // clouds.splice(i, 1); // Remove cloud from array
-                }
-            }
+                worlds[0].mesh.remove(clouds[i].mesh);
+                clouds[i].mesh.geometry.dispose();
+                clouds[i].mesh.material.dispose();
 
-            // ---------------- CLOUD PARTICLE MOVEMENT ---------------- //\
-            for (let i = 0; i < clouds.length; i++) {
-                for (let j = 0; j < cloudParticles[i].length; j++) {
-                    cloudParticles[i][j].translateX(cloudParticleMovement[i][0]);
-                    cloudParticles[i][j].translateY(cloudParticleMovement[i][1]);
-                    cloudParticles[i][j].translateZ(cloudParticleMovement[i][2]);
-
-                    if (moveCounter % (cloudParticleMovementLoop[i] * 2) === 0) {
-                        cloudParticleMovement[i][0] = -cloudParticleMovement[i][0];
-                        cloudParticleMovement[i][1] = -cloudParticleMovement[i][1];
-                        cloudParticleMovement[i][2] = -cloudParticleMovement[i][2];
-                    } else if (moveCounter % cloudParticleMovementLoop[i] === 0) {
-                        cloudParticleMovementLoop[i] = Utils.randomInteger(0, Constants.CloudParticleMoveTimeOut);
-                        setCloudParticleMovement(cloudParticleMovement[i], Constants.CloudParticleMovementSpeed);
-                    }
-                    moveCounter++;
-                }
+                clouds[i] = new Cloud(worldReference);
+                worlds[0].mesh.add(clouds[i].mesh);
             }
         }
+
+        // ---------------- CLOUD PARTICLE MOVEMENT ---------------- //
+        for (let i = 0; i < clouds.length; i++) {
+            for (let j = 0; j < clouds[i].particles.length; j++) {
+                let particle = clouds[i].particles[j];
+
+                particle.mesh.translateX(particle.movementXYZ[0]);
+                particle.mesh.translateY(particle.movementXYZ[1]);
+                particle.mesh.translateZ(particle.movementXYZ[2]);
+
+                if (cloudParticleMoveCounter % (cloudParticleMovementLoop[i] * 2) === 0) {
+                    particle.movementXYZ[0] = -particle.movementXYZ[0];
+                    particle.movementXYZ[1] = -particle.movementXYZ[1];
+                    particle.movementXYZ[2] = -particle.movementXYZ[2];
+                } else if (cloudParticleMoveCounter % cloudParticleMovementLoop[i] === 0) {
+                    cloudParticleMovementLoop[i] = Utils.randomInteger(0, Constants.Cloud.ParticleMoveTimeOut);
+
+                    for (let j = 0; j < clouds[i].particles.length; j++) {
+                        Utils.setObjectSpeed(clouds[i].particles[j].movementXYZ, Constants.Cloud.ParticleMoveSpeed);
+                    }
+                }
+                cloudParticleMoveCounter++;
+            }
+        }
+
+        // ---------------- TREE LEAF MOVEMENT ---------------- //
+        // for (let i = 0; i < grove.length; i++) {
+        //     for (let j = 0; j < grove[i].length; j++) {
+        //         for (let k = 0; k < grove[i][j].length; k++) {
+        //             let leaf = grove[i][j][k];
+        //
+        //             leaf.mesh.translateX(leaf.movementXYZ[0]);
+        //             leaf.mesh.translateY(leaf.movementXYZ[1]);
+        //             leaf.mesh.translateZ(leaf.movementXYZ[2]);
+        //
+        //             if (leafMoveCounter % 2 === 0) {
+        //                 leaf.movementXYZ[0] = -leaf.movementXYZ[0];
+        //                 leaf.movementXYZ[1] = -leaf.movementXYZ[1];
+        //                 leaf.movementXYZ[2] = -leaf.movementXYZ[2];
+        //             } else if (leafMoveCounter % 1 === 0) {
+        //                 for (let l = 0; l < grove[i].length; l++) {
+        //                     for (let m = 0; m < grove[l]; m++) {
+        //                         for (let n = 0; n < grove[l][m].length; n++) {
+        //                             let leaf = grove[i][j][k];
+        //                             Utils.setObjectSpeed(leaf.movementXYZ, Constants.Forest.LeafMoveSpeed);
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //             leafMoveCounter++;
+        //         }
+        //     }
+        // }
         renderer.render(scene, camera);
     };
     animate();
-}
-
-function setCloudParticleMovement(particleXYZ, speed) {
-    particleXYZ[0] = Utils.randomNumber(-speed, speed);
-    particleXYZ[1] = Utils.randomNumber(-speed, speed);
-    particleXYZ[2] = Utils.randomNumber(-speed, speed);
 }
 
 function onWindowResize() {

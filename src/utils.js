@@ -15,4 +15,18 @@ export default class Utils {
         }
         return array;
     }
+
+    static setObjectSpeed(objectMovementSpeed, newSpeed) {
+        for (let i = 0; i < 3; i++) {
+            objectMovementSpeed[i] = Utils.randomNumber(-newSpeed, newSpeed);
+        }
+    }
+
+    static setGroupSpeed(objectArr, newSpeed) {
+        for (let i = 0; i < objectArr.length; i++) {
+            for (let j = 0; j < 3; j++) {
+                objectArr[i][j] = Utils.randomNumber(-newSpeed, newSpeed);
+            }
+        }
+    }
 }

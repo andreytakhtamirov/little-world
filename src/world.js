@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import Utils from "./utils";
+import * as Constants from "./constants";
 
 export default class World {
     constructor() {
@@ -7,10 +9,9 @@ export default class World {
         const worldDepth = 50;
 
         const worldGeometry = new THREE.BoxGeometry(worldWidth, worldHeight, worldDepth);
-        const worldLine = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.LineBasicMaterial({color: "rgb(71,47,37)"}));
         const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(54,85,48)"});
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
         this.mesh.receiveShadow = true;
-        //this.mesh.add(worldLine);
+        this.numForests = Utils.randomInteger(Constants.Forest.MinCount, Constants.Forest.MaxCount)
     }
 }

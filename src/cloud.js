@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import Utils from "./utils";
+import * as Constants from "./constants";
 
 export default class Cloud {
-    constructor(cloudParticles, worldReference) {
-        this.cloudRandomMovementX = Utils.randomNumber(-0.001, 0.001);
-        this.cloudRandomMovementY = Utils.randomNumber(-0.001, 0.001);
-        this.cloudRandomMovementZ = Utils.randomNumber(-0.001, 0.001);
+    constructor(worldReference) {
+        this.cloudRandomMovementX = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
+        this.cloudRandomMovementY = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
+        this.cloudRandomMovementZ = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         const cloudWidthHeightDepth = Utils.randomNumber(2, 5);
         const particlesInEachCloud = 3;
 
@@ -14,14 +15,16 @@ export default class Cloud {
         const cloudPositionY = Utils.randomNumber(10, 15);
         const cloudPositionZ = Utils.randomNumber((-worldReference.geometry.parameters.depth / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.depth / 2) - cloudWidthHeightDepth);
 
-        this.cloudParticle = new CloudParticle(cloudWidthHeightDepth);
-        cloudParticles[0] = this.cloudParticle.mesh;
-        this.mesh = this.cloudParticle.mesh;
+        this.particles = [];
+
+        let cloudParticle = new CloudParticle(cloudWidthHeightDepth);
+        this.particles[0] = cloudParticle;
+        this.mesh = cloudParticle.mesh;
 
         for (let i = 0; i < particlesInEachCloud - 1; i++) {
-            this.cloudParticle = new CloudParticle(cloudWidthHeightDepth);
-            cloudParticles[i + 1] = this.cloudParticle.mesh;
-            this.mesh.add(this.cloudParticle.mesh);
+            let cloudParticle = new CloudParticle(cloudWidthHeightDepth);
+            this.particles[i + 1] = cloudParticle;
+            this.mesh.add(cloudParticle.mesh);
         }
 
         this.mesh.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
@@ -36,13 +39,8 @@ class CloudParticle {
 
         this.mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
-        const cloudLine = new THREE.LineSegments(new THREE.EdgesGeometry(cloudGeometry), new THREE.LineBasicMaterial({color: "rgb(170,170,170)"}));
-
         // set cloud to cast a shadow
         this.mesh.castShadow = true;
-
-        // Hide cloud outline to save memory!!
-        //this.mesh.add(cloudLine);
 
         const particlePositionX = Math.random() * Utils.randomNumber(cloudWidthHeightDepth / 2, cloudWidthHeightDepth);
         const particlePositionY = Math.random() * Utils.randomNumber(cloudWidthHeightDepth / 2, cloudWidthHeightDepth);
@@ -53,5 +51,8 @@ class CloudParticle {
         this.mesh.material.transparent = true;
         this.mesh.material.opacity = Utils.randomNumber(0.3, 0.9);
         this.mesh.renderOrder = 2;
+
+        this.movementXYZ = [];
+        Utils.setObjectSpeed(this.movementXYZ, Constants.Cloud.ParticleMoveSpeed);
     }
 }

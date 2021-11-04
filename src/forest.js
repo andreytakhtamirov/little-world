@@ -1,10 +1,15 @@
 import * as THREE from "three";
 import Utils from "./utils";
+import * as Constants from "./constants";
 
 export default class Forest {
     constructor(treesCount, worldReference) {
+        this.trees = [];
+
         // First set up a center Tree for the forest. Other Tree meshes will be added to this mesh
-        this.mesh = new Tree(0, worldReference).mesh;
+        let tree = new Tree(0, worldReference);
+        this.trees[0] = tree.leaves;
+        this.mesh = tree.mesh;
 
         const worldWidth = worldReference.geometry.parameters.width / 2;
         const positionX = Math.random() * (worldWidth - 12 + worldWidth - 12) - (worldWidth - 12);
@@ -13,8 +18,11 @@ export default class Forest {
 
         this.mesh.position.set(positionX, positionY, positionZ);
 
+
         for (let i = 0; i < treesCount; i++) {
-            this.mesh.add(new Tree(-positionY, worldReference).mesh);
+            let tree = new Tree(-positionY, worldReference);
+            this.trees[i+1] = tree.leaves;
+            this.mesh.add(tree.mesh);
         }
     }
 }
@@ -47,8 +55,12 @@ class Tree {
         this.mesh.add(stemLine);
         this.mesh.castShadow = true;
 
+        this.leaves = [];
+
         for (let i = 0; i < leavesInTree; i++) {
-            this.mesh.add(new Leaf(this.mesh).mesh);
+            let leaf = new Leaf(this.mesh);
+            this.leaves[i] = leaf;
+            this.mesh.add(leaf.mesh);
         }
         this.mesh.rotation.y = Math.random() * 360;
         this.mesh.renderOrder = 1;
@@ -86,5 +98,8 @@ class Leaf {
         this.mesh.add(leafLine);
 
         this.mesh.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
+
+        this.movementXYZ = [];
+        Utils.setObjectSpeed(this.movementXYZ, Constants.Forest.LeafMoveSpeed);
     }
 }
