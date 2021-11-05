@@ -146,7 +146,7 @@ function initializeWorld() {
             worlds[i].mesh.add(clouds[i + j].mesh);
         }
     }
-    camera.position.set(0, 17, 52);
+    camera.position.set(-15, 26, 85);
     controls.update();
 
     for (let i = 0; i < clouds.length; i++) {
@@ -154,10 +154,6 @@ function initializeWorld() {
     }
 
     let animate = function () {
-        console.log("camera X:" + camera.position.x);
-        console.log("camera Y:" + camera.position.y);
-        console.log("camera Z:" + camera.position.z);
-
         requestAnimationFrame(animate);
         composer.render();
 
