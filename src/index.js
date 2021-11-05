@@ -53,7 +53,9 @@ function initializeWorld() {
     let moveForward = true;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color("rgb(236,222,136)");
+    scene.background = new THREE.Color("rgba(236,222,136,0.42)");
+    scene.add(new THREE.AmbientLight("rgb(236,222,136)", 0.4));
+    scene.add(new THREE.AmbientLight("rgb(255,255,255)", 0.3));
     scene.add(new THREE.AmbientLight("rgb(232,104,104)", 0.6));
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -114,16 +116,15 @@ function initializeWorld() {
 
     worldReference = worlds[0].mesh;
 
-    let star1 = new Star(worldReference, 1800, 1000, 1000, 500, 1.8);
-    let star2 = new Star(worldReference, -800, -1900, 100, 200, 2);
+    let star1 = new Star(worldReference, 100, 100, 100, 50, 1);
+    //let star2 = new Star(worldReference, -800, -1900, 100, 200, 2);
+
     scene.add(star1.light);
-    scene.add(star2.light);
+    //scene.add(star2.light);
 
     // Don't show stars (too many objects cause low frame rates)
     // scene.add(star1.mesh);
-    // scene.add(star2.mesh);
-    // let moon = new Moon(1000, 0, 1000, 100);
-    // scene.add(moon.mesh);
+    //scene.add(star2.mesh);
 
     //light helper
     // const helper = new THREE.CameraHelper(star1.light.shadow.camera);
@@ -143,15 +144,9 @@ function initializeWorld() {
         for (let j = 0; j < Constants.Cloud.Count; j++) {
             clouds[i + j] = new Cloud(worldReference);
             worlds[i].mesh.add(clouds[i + j].mesh);
-            // for (let k = 0; k < rainDropsPerCloud; k++) {
-            //     rainDrops[k] = new Rain().mesh;
-            //     clouds[j].add(rainDrops[k]);
-            // }
         }
     }
-    camera.position.set(40, 25, 50); // Camera position for small earth (50x50)
-    //camera.position.set(120, 120, 200); // Camera position for medium earth (100x100)
-    //camera.position.set(5000, 5000, 5000); // Camera position for huge earth (1000x1000)
+    camera.position.set(0, 17, 52);
     controls.update();
 
     for (let i = 0; i < clouds.length; i++) {
@@ -159,6 +154,10 @@ function initializeWorld() {
     }
 
     let animate = function () {
+        console.log("camera X:" + camera.position.x);
+        console.log("camera Y:" + camera.position.y);
+        console.log("camera Z:" + camera.position.z);
+
         requestAnimationFrame(animate);
         composer.render();
 
@@ -249,6 +248,10 @@ function initializeWorld() {
         //     }
         // }
         renderer.render(scene, camera);
+
+        for (let i = 0; i < worlds.length; i++) {
+            worlds[i].mesh.rotation.y += Constants.World.RotationSpeed;
+        }
     };
     animate();
 }

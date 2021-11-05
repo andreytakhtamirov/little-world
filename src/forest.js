@@ -38,10 +38,10 @@ class Tree {
         const stemHeight = randDimension;
         const stemDepth = stemWidth;    // Tree trunk will be square-based
 
-        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(42,23,13)"});
+        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(49,32,7)"});
         let stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
 
-        let stemLineMaterial = new THREE.LineBasicMaterial({color: "rgb(43,28,28)"});
+        let stemLineMaterial = new THREE.LineBasicMaterial({color: "rgb(35,20,20)"});
         let stemLine = new THREE.LineSegments(new THREE.EdgesGeometry(stemGeometry), stemLineMaterial);
 
         this.mesh = new THREE.Mesh(stemGeometry, stemMaterial);

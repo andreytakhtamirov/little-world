@@ -1,7 +1,8 @@
 
-export const ResolutionRatio = 0.6;
+export const ResolutionRatio = 0.8;
 
 const WorldSidesCount = 1;
+const WorldRotationSpeed = 0.001;
 
 const CloudsCount = 10;
 const RainDropsPerCloud = 30;
@@ -17,6 +18,9 @@ const LeafMovementSpeed = 0.02;
 export class World {
     static get SidesCount() {
         return WorldSidesCount;
+    }
+    static get RotationSpeed() {
+        return WorldRotationSpeed;
     }
 }
 
