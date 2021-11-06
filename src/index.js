@@ -57,8 +57,8 @@ function initializeWorld() {
     renderer = new THREE.WebGLRenderer({antialias: true});
 
     // Show stats on page (framerate)
-    stats = new Stats();
-    document.body.appendChild(stats.dom);
+    // stats = new Stats();
+    // document.body.appendChild(stats.dom);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
