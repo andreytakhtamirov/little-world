@@ -11,7 +11,6 @@ import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass
 import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import * as Constants from "./constants";
-import Player from "./Player";
 
 class App extends Component {
     componentDidMount() {
