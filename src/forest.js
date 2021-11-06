@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import Utils from "./utils";
 import * as Constants from "./constants";
+import * as Colours from "./colours";
 
 export default class Forest {
     constructor(treesCount, worldReference) {
@@ -21,7 +22,7 @@ export default class Forest {
 
         for (let i = 0; i < treesCount; i++) {
             let tree = new Tree(-positionY, worldReference);
-            this.trees[i+1] = tree.leaves;
+            this.trees[i + 1] = tree.leaves;
             this.mesh.add(tree.mesh);
         }
     }
@@ -30,7 +31,7 @@ export default class Forest {
 class Tree {
     constructor(yOffset, worldReference) {
         // How many leaves are in each tree
-        const leavesInTree = 3;
+        const leavesInTree = Utils.randomInteger(2, 3);
 
         // Stem dimensions
         const randDimension = Utils.randomNumber(3, 8);
@@ -38,10 +39,10 @@ class Tree {
         const stemHeight = randDimension;
         const stemDepth = stemWidth;    // Tree trunk will be square-based
 
-        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(63,42,10)"});
+        let stemMaterial = new THREE.MeshStandardMaterial({color: Colours.Tree.Stem});
         let stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
 
-        let stemLineMaterial = new THREE.LineBasicMaterial({color: "rgb(47,31,8)"});
+        let stemLineMaterial = new THREE.LineBasicMaterial({color: Colours.Tree.StemOutline});
         let stemLine = new THREE.LineSegments(new THREE.EdgesGeometry(stemGeometry), stemLineMaterial);
 
         this.mesh = new THREE.Mesh(stemGeometry, stemMaterial);
@@ -72,13 +73,6 @@ class Leaf {
         // Leaf dimensions (cube)
         const leafWidthHeightDepth = Utils.randomNumber(2, 2.5) * stemMesh.geometry.parameters.width;
 
-        // Leaf colours
-        const leafColours =
-            ["rgb(24,65,15)", "rgb(35,80,15)",
-                "rgb(63,78,23)", "rgb(14,61,12)",
-                "rgb(26,77,5)", "rgb(55,89,43)",
-                "rgb(53,86,43)", "rgb(23,61,12)"];
-
         // Leaf positions
         const treeHeight = stemMesh.geometry.parameters.height;
         const minLeafPosY = treeHeight / 2 - leafWidthHeightDepth / 2;
@@ -86,17 +80,17 @@ class Leaf {
         const randomLeafPositionY = Math.random() * (treeHeight / 2 - minLeafPosY) + minLeafPosY;
         const randomLeafPositionZ = Math.random() * (leafWidthHeightDepth / 2 + leafWidthHeightDepth / 4) - leafWidthHeightDepth / 4;
 
-        let randomColour = new THREE.Color(leafColours[(Utils.randomInteger(0, leafColours.length - 1))]);
+        let randomColour = new THREE.Color(Colours.Tree.Leaves[(Utils.randomInteger(0, Colours.Tree.Leaves.length - 1))]);
         let leafMaterial = new THREE.MeshStandardMaterial({color: randomColour});
 
         let leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
-        let leafLineMaterial = new THREE.LineBasicMaterial({color: "rgb(14,61,12)"});
+        let leafLineMaterial = new THREE.LineBasicMaterial({color: Utils.shade(randomColour.getHexString(), -0.7)});
         let leafLine = new THREE.LineSegments(new THREE.EdgesGeometry(leafGeometry), leafLineMaterial);
 
         this.mesh = new THREE.Mesh(leafGeometry, leafMaterial);
         this.mesh.add(leafLine);
-
+        this.mesh.castShadow = true;
         this.mesh.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
 
         this.movementXYZ = [];

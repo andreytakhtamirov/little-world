@@ -11,6 +11,7 @@ import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass
 import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import * as Constants from "./constants";
+import Stats from "three/examples/jsm/libs/stats.module";
 
 class App extends Component {
     componentDidMount() {
@@ -43,14 +44,9 @@ function initializeWorld() {
     let worlds = [];
     let clouds = [];
     let grove = [];
-    let rainDrops = [];
 
-    let initialCloudParticleLocation = Utils.create2dArray(Constants.Cloud.Count);
-    let cloudParticleMovement = Utils.create2dArray(Constants.Cloud.Count);
-    let lastMovement = Utils.create2dArray(Constants.Cloud.Count);
     let cloudParticleMoveCounter = 0;
     let leafMoveCounter = 0;
-    let moveForward = true;
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color("rgb(186,212,255)");
@@ -61,8 +57,8 @@ function initializeWorld() {
     renderer = new THREE.WebGLRenderer({antialias: true});
 
     // Show stats on page (framerate)
-    // stats = new Stats();
-    // document.body.appendChild(stats.dom);
+    stats = new Stats();
+    document.body.appendChild(stats.dom);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -88,6 +84,9 @@ function initializeWorld() {
     composer.addPass(renderScene);
     composer.addPass(bloomPass)
 
+    const worldWidth = Constants.World.Width;
+    const worldDepth = Constants.World.Depth;
+
     // Set up plane orientation (for a 1-6 sided earth)
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         worlds[i] = new World();
@@ -96,19 +95,19 @@ function initializeWorld() {
         } else {
             if (i % 5 === 0) {
                 worlds[i].mesh.rotation.x = 180 * Math.PI / 180;
-                worlds[i].mesh.position.set(0, -100, 0);
+                worlds[i].mesh.position.set(0, -worldWidth, 0);
             } else if (i % 4 === 0) {
                 worlds[i].mesh.rotation.z = 270 * Math.PI / 180;
-                worlds[i].mesh.position.set(50, -50, 0);
+                worlds[i].mesh.position.set(worldWidth / 2, -worldDepth / 2, 0);
             } else if (i % 3 === 0) {
                 worlds[i].mesh.rotation.x = 90 * Math.PI / 180;
-                worlds[i].mesh.position.set(0, -50, 50);
+                worlds[i].mesh.position.set(0, -worldWidth / 2, worldDepth / 2);
             } else if (i % 2 === 0) {
                 worlds[i].mesh.rotation.z = 90 * Math.PI / 180;
-                worlds[i].mesh.position.set(-50, -50, 0);
+                worlds[i].mesh.position.set(-worldWidth / 2, -worldDepth / 2, 0);
             } else if (i % 2 - 1 === 0) {
                 worlds[i].mesh.rotation.x = 270 * Math.PI / 180;
-                worlds[i].mesh.position.set(0, -50, -50);
+                worlds[i].mesh.position.set(0, -worldWidth / 2, -worldDepth / 2);
             }
             worlds[0].mesh.add(worlds[i].mesh);
         }
@@ -116,15 +115,15 @@ function initializeWorld() {
 
     worldReference = worlds[0].mesh;
 
-    let star1 = new Star(worldReference, 100, 100, 100, 50, 1);
-    //let star2 = new Star(worldReference, -800, -1900, 100, 200, 2);
+    let star1 = new Star(worldReference, 200, 100, 170, 50, 1.3);
+    //let star2 = new Star(worldReference, 50, 80, 100, 50, 1);
 
     scene.add(star1.light);
-    //scene.add(star2.light);
+    // scene.add(star2.light);
 
     // Don't show stars (too many objects cause low frame rates)
     // scene.add(star1.mesh);
-    //scene.add(star2.mesh);
+    // scene.add(star2.mesh);
 
     //light helper
     // const helper = new THREE.CameraHelper(star1.light.shadow.camera);
@@ -245,9 +244,8 @@ function initializeWorld() {
         // }
         renderer.render(scene, camera);
 
-        for (let i = 0; i < worlds.length; i++) {
-            worlds[i].mesh.rotation.y += Constants.World.RotationSpeed;
-        }
+        // worlds[0].mesh.rotation.y += Constants.World.RotationSpeed;
+
     };
     animate();
 }

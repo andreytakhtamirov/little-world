@@ -1,10 +1,11 @@
 import * as THREE from "three";
+import * as Colours from "./colours"
 
 export default class Star {
     constructor(worldReference, positionX, positionY, positionZ, size, intensity) {
         const starGeometry = new THREE.BoxGeometry(size, size, size);
-        const starLine = new THREE.LineSegments(new THREE.EdgesGeometry(starGeometry), new THREE.LineBasicMaterial({color: "rgb(0,0,0)"}));
-        const starMaterial = new THREE.MeshStandardMaterial({color: "rgb(255,129,22)"});
+        const starLine = new THREE.LineSegments(new THREE.EdgesGeometry(starGeometry), new THREE.LineBasicMaterial({color: Colours.Star.Outline}));
+        const starMaterial = new THREE.MeshStandardMaterial({color: Colours.Star.Material});
 
         this.mesh = new THREE.Mesh(starGeometry, starMaterial);
         this.mesh.add(starLine);
@@ -20,7 +21,8 @@ export default class Star {
 
 class Light {
     constructor(worldReference, positionX, positionY, positionZ, intensity) {
-        const lightArea = worldReference.geometry.parameters.width / 2;
+        // Add 25% of world width to capture the whole world, even when it rotates
+        const lightArea = worldReference.geometry.parameters.width / 2 + worldReference.geometry.parameters.width * 0.25;
 
         //Create a DirectionalLight and turn on shadows for the light
         this.light = new THREE.DirectionalLight("rgb(246,200,67)", intensity);

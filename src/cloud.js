@@ -1,13 +1,14 @@
 import * as THREE from "three";
 import Utils from "./utils";
 import * as Constants from "./constants";
+import * as Colours from "./colours";
 
 export default class Cloud {
     constructor(worldReference) {
         this.cloudRandomMovementX = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         this.cloudRandomMovementY = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         this.cloudRandomMovementZ = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
-        const cloudWidthHeightDepth = Utils.randomNumber(2, 5);
+        const cloudWidthHeightDepth = Utils.randomNumber(1, 4);
         const particlesInEachCloud = 3;
 
         const cloudRotation = Math.random() * (360);
@@ -34,7 +35,7 @@ export default class Cloud {
 
 class CloudParticle {
     constructor(cloudWidthHeightDepth) {
-        const cloudMaterial = new THREE.MeshStandardMaterial({color: "rgb(213,213,213)"});
+        const cloudMaterial = new THREE.MeshStandardMaterial({color: Colours.Cloud.Material});
         const cloudGeometry = new THREE.BoxGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
 
         this.mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);

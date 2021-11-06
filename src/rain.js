@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import * as Colours from "./colours";
 
 export default class Rain {
     constructor() {
@@ -14,15 +15,12 @@ class RainDrop {
         const positionY = 0;
         const positionZ = Math.random() * (8 + 4) - 4;
 
-        const rainDropMaterial = new THREE.MeshStandardMaterial({color: "rgb(107,201,255)"});
+        const rainDropMaterial = new THREE.MeshStandardMaterial({color: Colours.Rain.Material});
         const rainDropGeometry = new THREE.BoxGeometry(rainDropWidthHeightDepth, rainDropWidthHeightDepth, rainDropWidthHeightDepth);
+        const rainDropLine = new THREE.LineSegments(new THREE.EdgesGeometry(rainDropGeometry), new THREE.LineBasicMaterial({color: Colours.Rain.Outline}));
 
         this.mesh = new THREE.Mesh(rainDropGeometry, rainDropMaterial);
-
-        const rainDropLine = new THREE.LineSegments(new THREE.EdgesGeometry(rainDropGeometry), new THREE.LineBasicMaterial({color: "rgb(1,45,116)"}));
-
         this.mesh.add(rainDropLine);
-
         this.mesh.position.set(positionX, positionY, positionZ);
     }
 }
