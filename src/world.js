@@ -9,8 +9,8 @@ export default class World {
         const worldDepth = 30;
 
         const worldGeometry = new THREE.BoxGeometry(worldWidth, worldHeight, worldDepth);
-        const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(19,45,13)"});
-        let line = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.MeshStandardMaterial({color: "rgb(34,34,34)"}));
+        const grassMaterial = new THREE.MeshStandardMaterial({color: "rgb(38,72,20)"});
+        let line = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry), new THREE.MeshStandardMaterial({color: "rgb(29,54,15)"}));
 
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
         this.mesh.add(line);

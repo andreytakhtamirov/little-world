@@ -38,10 +38,10 @@ class Tree {
         const stemHeight = randDimension;
         const stemDepth = stemWidth;    // Tree trunk will be square-based
 
-        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(49,32,7)"});
+        let stemMaterial = new THREE.MeshStandardMaterial({color: "rgb(63,42,10)"});
         let stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
 
-        let stemLineMaterial = new THREE.LineBasicMaterial({color: "rgb(35,20,20)"});
+        let stemLineMaterial = new THREE.LineBasicMaterial({color: "rgb(47,31,8)"});
         let stemLine = new THREE.LineSegments(new THREE.EdgesGeometry(stemGeometry), stemLineMaterial);
 
         this.mesh = new THREE.Mesh(stemGeometry, stemMaterial);
@@ -75,9 +75,9 @@ class Leaf {
         // Leaf colours
         const leafColours =
             ["rgb(24,65,15)", "rgb(35,80,15)",
-                "rgb(19,42,16)", "rgb(14,61,12)",
-                "rgb(26,77,5)", "rgb(31,52,17)",
-                "rgb(19,45,6)", "rgb(23,61,12)"];
+                "rgb(63,78,23)", "rgb(14,61,12)",
+                "rgb(26,77,5)", "rgb(55,89,43)",
+                "rgb(53,86,43)", "rgb(23,61,12)"];
 
         // Leaf positions
         const treeHeight = stemMesh.geometry.parameters.height;
@@ -91,7 +91,7 @@ class Leaf {
 
         let leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
-        let leafLineMaterial = new THREE.LineBasicMaterial({color: "rgb(11,35,4)"});
+        let leafLineMaterial = new THREE.LineBasicMaterial({color: "rgb(14,61,12)"});
         let leafLine = new THREE.LineSegments(new THREE.EdgesGeometry(leafGeometry), leafLineMaterial);
 
         this.mesh = new THREE.Mesh(leafGeometry, leafMaterial);

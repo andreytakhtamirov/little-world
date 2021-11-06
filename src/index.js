@@ -11,6 +11,7 @@ import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass
 import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import * as Constants from "./constants";
+import Player from "./Player";
 
 class App extends Component {
     componentDidMount() {
@@ -53,10 +54,10 @@ function initializeWorld() {
     let moveForward = true;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color("rgba(236,222,136,0.42)");
-    scene.add(new THREE.AmbientLight("rgb(236,222,136)", 0.4));
+    scene.background = new THREE.Color("rgb(186,212,255)");
+    scene.add(new THREE.AmbientLight("rgb(236,222,136)", 0.3));
     scene.add(new THREE.AmbientLight("rgb(255,255,255)", 0.3));
-    scene.add(new THREE.AmbientLight("rgb(232,104,104)", 0.6));
+    scene.add(new THREE.AmbientLight("rgb(232,104,104)", 0.7));
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({antialias: true});
 

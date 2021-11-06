@@ -23,7 +23,7 @@ class Light {
         const lightArea = worldReference.geometry.parameters.width / 2;
 
         //Create a DirectionalLight and turn on shadows for the light
-        this.light = new THREE.DirectionalLight(0xffffff, intensity);
+        this.light = new THREE.DirectionalLight("rgb(246,200,67)", intensity);
         this.light.castShadow = true
 
         // set light position
