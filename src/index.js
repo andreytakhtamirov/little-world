@@ -7,9 +7,6 @@ import Forest from "./forest";
 import Utils from "./utils";
 import Cloud from "./cloud";
 import World from "./world";
-import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
-import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import * as Constants from "./constants";
 import Stats from "three/examples/jsm/libs/stats.module";
 
@@ -36,7 +33,6 @@ var scene;
 var worldReference;
 var camera;
 var renderer;
-var composer;
 
 function initializeWorld() {
     const cloudParticleMovementLoop = [];
@@ -53,8 +49,12 @@ function initializeWorld() {
     scene.add(new THREE.AmbientLight("rgb(236,222,136)", 0.3));
     scene.add(new THREE.AmbientLight("rgb(255,255,255)", 0.3));
     scene.add(new THREE.AmbientLight("rgb(232,104,104)", 0.7));
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 10, 1000);
     renderer = new THREE.WebGLRenderer({antialias: true});
+    // Constants.Page.ResolutionRatio = window.screen.width * window.devicePixelRatio / 1920;
+    // console.log(window.screen.width * window.devicePixelRatio);
+    // console.log(window.screen.height * window.devicePixelRatio);
+    // console.log(Constants.Page.ResolutionRatio);
 
     // Show stats on page (framerate)
     // stats = new Stats();
@@ -63,26 +63,10 @@ function initializeWorld() {
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor();
-    renderer.setPixelRatio(window.devicePixelRatio * Constants.ResolutionRatio);
+    renderer.setPixelRatio(window.devicePixelRatio * Constants.Page.ResolutionRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     rootElement.appendChild(renderer.domElement);
-
-    const params = {
-        exposure: 1,
-        bloomStrength: 1.5,
-        bloomThreshold: 0,
-        bloomRadius: 1
-    };
-
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-    bloomPass.threshold = params.bloomThreshold;
-    bloomPass.strength = params.bloomStrength;
-    bloomPass.radius = params.bloomRadius;
-    composer = new EffectComposer(renderer);
-    const renderScene = new RenderPass(scene, camera);
-    composer.addPass(renderScene);
-    composer.addPass(bloomPass)
 
     const worldWidth = Constants.World.Width;
     const worldDepth = Constants.World.Depth;
@@ -145,7 +129,7 @@ function initializeWorld() {
             worlds[i].mesh.add(clouds[i + j].mesh);
         }
     }
-    camera.position.set(-15, 26, 85);
+    camera.position.set(-15, 38, 80);
     controls.update();
 
     for (let i = 0; i < clouds.length; i++) {
@@ -154,14 +138,13 @@ function initializeWorld() {
 
     let animate = function () {
         requestAnimationFrame(animate);
-        composer.render();
 
         if (stats != null) {
             stats.update();
         }
 
         // ---------------- WORLD MOVEMENT ---------------- //
-        //world.rotation.y += 0.006;
+        worlds[0].mesh.rotation.y += 0.001;
         // ---------------- OTHER PLANET MOVEMENT ---------------- //
         //moon.rotation.y -= 0.02;
         // star1.rotation.y += 0.007
@@ -244,8 +227,9 @@ function initializeWorld() {
         // }
         renderer.render(scene, camera);
 
-        // worlds[0].mesh.rotation.y += Constants.World.RotationSpeed;
-
+        // console.log(camera.position.x);
+        // console.log(camera.position.y);
+        // console.log(camera.position.z);
     };
     animate();
 }
@@ -254,5 +238,4 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
 }

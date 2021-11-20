@@ -1,5 +1,4 @@
-export const ResolutionRatio = 1;
-
+var ResolutionRatio = 0.75;
 const WorldSidesCount = 1;
 const WorldRotationSpeed = 0.001;
 const WorldWidth = 30;
@@ -17,6 +16,14 @@ const MaxNumOfForests = 2;
 const TreesPerForest = 15;
 const LeafMovementSpeed = 0.02;
 
+export class Page {
+    static get ResolutionRatio() {
+        return ResolutionRatio;
+    }
+    static set ResolutionRatio(newRatio) {
+        ResolutionRatio = newRatio;
+    }
+}
 export class World {
     static get SidesCount() {
         return WorldSidesCount;
