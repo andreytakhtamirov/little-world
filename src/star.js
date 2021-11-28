@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import * as Colours from "./colours"
+import * as Constants from "./constants";
 
 export default class Star {
     constructor(worldReference, positionX, positionY, positionZ, size, intensity) {
@@ -21,8 +22,10 @@ export default class Star {
 
 class Light {
     constructor(worldReference, positionX, positionY, positionZ, intensity) {
-        // Add 25% of world width to capture the whole world, even when it rotates
-        const lightArea = worldReference.geometry.parameters.width / 2 + worldReference.geometry.parameters.width * 0.25;
+        const numWorldsWidth = Math.cbrt(Constants.World.SidesCount);
+
+        // Add 50% of world width to capture the whole world, even when it rotates
+        const lightArea = worldReference.geometry.parameters.width / 2 * numWorldsWidth + worldReference.geometry.parameters.width * numWorldsWidth * 0.5;
 
         //Create a DirectionalLight and turn on shadows for the light
         this.light = new THREE.DirectionalLight("rgb(246,200,67)", intensity);
@@ -42,6 +45,6 @@ class Light {
             Math.sqrt(Math.pow(this.light.position.x, 2)
                 + Math.pow(this.light.position.y, 2)
                 + Math.pow(this.light.position.z, 2))
-            + worldReference.geometry.parameters.width;
+            + worldReference.geometry.parameters.width * numWorldsWidth;
     }
 }

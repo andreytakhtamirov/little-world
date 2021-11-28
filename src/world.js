@@ -11,12 +11,10 @@ export default class World {
 
         const worldGeometry = new THREE.BoxGeometry(worldWidth, worldHeight, worldDepth);
         const grassMaterial = new THREE.MeshStandardMaterial({color: Colours.World.Grass});
-        let line = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry),
-            new THREE.LineBasicMaterial({color: Colours.World.GrassOutline}));
 
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
-        this.mesh.add(line);
         this.mesh.receiveShadow = true;
         this.numForests = Utils.randomInteger(Constants.Forest.MinCount, Constants.Forest.MaxCount)
+        this.numClouds = Utils.randomInteger(Constants.Cloud.MinCount, Constants.Cloud.MaxCount);
     }
 }

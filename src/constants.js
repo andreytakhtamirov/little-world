@@ -1,29 +1,32 @@
-var ResolutionRatio = 0.75;
+var ResolutionRatio = 1;
 const WorldSidesCount = 1;
 const WorldRotationSpeed = 0.001;
 const WorldWidth = 30;
 const WorldHeight = 1;
 const WorldDepth = 30;
 
-const CloudsCount = 10;
+const MinCloudsCount = 2;
+const MaxCloudsCount = 5;
 const RainDropsPerCloud = 30;
 const CloudMovementSpeed = 0.01; // 0.001
 const CloudParticleMovementSpeed = 0.002; //0.002
 const CloudParticleMoveTimeOut = 3000;  //3000
 
-const MinNumOfForests = 1
-const MaxNumOfForests = 2;
-const TreesPerForest = 15;
+const MinNumOfForests = 2;
+const MaxNumOfForests = 3;
+const TreesPerForest = 10;
 const LeafMovementSpeed = 0.02;
 
 export class Page {
     static get ResolutionRatio() {
         return ResolutionRatio;
     }
+
     static set ResolutionRatio(newRatio) {
         ResolutionRatio = newRatio;
     }
 }
+
 export class World {
     static get SidesCount() {
         return WorldSidesCount;
@@ -47,8 +50,12 @@ export class World {
 }
 
 export class Cloud {
-    static get Count() {
-        return CloudsCount;
+    static get MinCount() {
+        return MinCloudsCount;
+    }
+
+    static get MaxCount() {
+        return MaxCloudsCount;
     }
 
     static get RainDropsCount() {

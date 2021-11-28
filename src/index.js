@@ -9,11 +9,12 @@ import Cloud from "./cloud";
 import World from "./world";
 import * as Constants from "./constants";
 import Stats from "three/examples/jsm/libs/stats.module";
+import Weather from "./weather";
 
 class App extends Component {
     componentDidMount() {
         window.addEventListener('resize', onWindowResize);
-        initializeWorld()
+        initializeWorld();
     }
 
     render() {
@@ -33,10 +34,11 @@ var scene;
 var worldReference;
 var camera;
 var renderer;
+var animationActive;
 
 function initializeWorld() {
     const cloudParticleMovementLoop = [];
-
+    animationActive = true;
     let worlds = [];
     let clouds = [];
     let grove = [];
@@ -44,17 +46,20 @@ function initializeWorld() {
     let cloudParticleMoveCounter = 0;
     let leafMoveCounter = 0;
 
+    let randomWeather = Utils.randomInteger(1, 4);
+    let weather = new Weather(randomWeather);
+
     scene = new THREE.Scene();
-    scene.background = new THREE.Color("rgb(186,212,255)");
-    scene.add(new THREE.AmbientLight("rgb(236,222,136)", 0.3));
+    scene.background = weather.sceneBackground;
+    scene.add(weather.sceneAmbientLight1);
     scene.add(new THREE.AmbientLight("rgb(255,255,255)", 0.3));
-    scene.add(new THREE.AmbientLight("rgb(232,104,104)", 0.7));
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 10, 1000);
+    scene.add(weather.sceneAmbientLight2);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({antialias: true});
     // Constants.Page.ResolutionRatio = window.screen.width * window.devicePixelRatio / 1920;
-    // console.log(window.screen.width * window.devicePixelRatio);
-    // console.log(window.screen.height * window.devicePixelRatio);
-    // console.log(Constants.Page.ResolutionRatio);
+    console.log(window.screen.width * window.devicePixelRatio);
+    console.log(window.screen.height * window.devicePixelRatio);
+    console.log(Constants.Page.ResolutionRatio);
 
     // Show stats on page (framerate)
     // stats = new Stats();
@@ -71,27 +76,28 @@ function initializeWorld() {
     const worldWidth = Constants.World.Width;
     const worldDepth = Constants.World.Depth;
 
-    // Set up plane orientation (for a 1-6 sided earth)
+    // Set up tiled world
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         worlds[i] = new World();
         if (i === 0) {
             scene.add(worlds[0].mesh);
         } else {
-            if (i % 5 === 0) {
-                worlds[i].mesh.rotation.x = 180 * Math.PI / 180;
-                worlds[i].mesh.position.set(0, -worldWidth, 0);
+            if (i % 8 === 0) {
+                worlds[i].mesh.position.set(worldWidth, 0, worldDepth);
+            } else if (i % 7 === 0) {
+                worlds[i].mesh.position.set(0, 0, worldDepth);
+            } else if (i % 6 === 0) {
+                worlds[i].mesh.position.set(-worldWidth, 0, worldDepth);
+            } else if (i % 5 === 0) {
+                worlds[i].mesh.position.set(worldWidth, 0, 0);
             } else if (i % 4 === 0) {
-                worlds[i].mesh.rotation.z = 270 * Math.PI / 180;
-                worlds[i].mesh.position.set(worldWidth / 2, -worldDepth / 2, 0);
+                worlds[i].mesh.position.set(worldWidth, 0, -worldDepth);
             } else if (i % 3 === 0) {
-                worlds[i].mesh.rotation.x = 90 * Math.PI / 180;
-                worlds[i].mesh.position.set(0, -worldWidth / 2, worldDepth / 2);
+                worlds[i].mesh.position.set(0, 0, -worldDepth);
             } else if (i % 2 === 0) {
-                worlds[i].mesh.rotation.z = 90 * Math.PI / 180;
-                worlds[i].mesh.position.set(-worldWidth / 2, -worldDepth / 2, 0);
+                worlds[i].mesh.position.set(-worldWidth, 0, 0);
             } else if (i % 2 - 1 === 0) {
-                worlds[i].mesh.rotation.x = 270 * Math.PI / 180;
-                worlds[i].mesh.position.set(0, -worldWidth / 2, -worldDepth / 2);
+                worlds[i].mesh.position.set(-worldWidth, 0, -worldDepth);
             }
             worlds[0].mesh.add(worlds[i].mesh);
         }
@@ -124,7 +130,7 @@ function initializeWorld() {
             worlds[i].mesh.add(forest.mesh);
         }
 
-        for (let j = 0; j < Constants.Cloud.Count; j++) {
+        for (let j = 0; j < worlds[i].numClouds; j++) {
             clouds[i + j] = new Cloud(worldReference);
             worlds[i].mesh.add(clouds[i + j].mesh);
         }
@@ -136,7 +142,20 @@ function initializeWorld() {
         cloudParticleMovementLoop[i] = Utils.randomInteger(1, Constants.Cloud.ParticleMoveTimeOut);
     }
 
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            cancelAnimationFrame(animate);
+            animationActive = false;
+        } else {
+            animationActive = true;
+        }
+    });
+
     let animate = function () {
+        if (!animationActive) {
+            // fix bug with multiple animate() calls when switching to/from tab quickly
+            return;
+        }
         requestAnimationFrame(animate);
 
         if (stats != null) {
@@ -144,7 +163,7 @@ function initializeWorld() {
         }
 
         // ---------------- WORLD MOVEMENT ---------------- //
-        worlds[0].mesh.rotation.y += 0.001;
+        // worlds[0].mesh.rotation.y += 0.001;
         // ---------------- OTHER PLANET MOVEMENT ---------------- //
         //moon.rotation.y -= 0.02;
         // star1.rotation.y += 0.007
@@ -225,8 +244,8 @@ function initializeWorld() {
         //         }
         //     }
         // }
-        renderer.render(scene, camera);
 
+        renderer.render(scene, camera);
         // console.log(camera.position.x);
         // console.log(camera.position.y);
         // console.log(camera.position.z);
