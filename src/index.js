@@ -20,7 +20,6 @@ class App extends Component {
     render() {
         return (
             <div ref={(mount) => {
-                this.mount = mount
             }}/>
         )
     }
@@ -31,7 +30,6 @@ ReactDOM.render(<App/>, rootElement);
 
 var stats;
 var scene;
-var worldReference;
 var camera;
 var renderer;
 var animationActive;
@@ -44,7 +42,6 @@ function initializeWorld() {
     let grove = [];
 
     let cloudParticleMoveCounter = 0;
-    let leafMoveCounter = 0;
 
     let randomWeather = Utils.randomInteger(1, 4);
     let weather = new Weather(randomWeather);
@@ -56,12 +53,11 @@ function initializeWorld() {
     scene.add(weather.sceneAmbientLight2);
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({antialias: true});
-    // Constants.Page.ResolutionRatio = window.screen.width * window.devicePixelRatio / 1920;
-    console.log(window.screen.width * window.devicePixelRatio);
-    console.log(window.screen.height * window.devicePixelRatio);
-    console.log(Constants.Page.ResolutionRatio);
+    if (window.screen.width * window.devicePixelRatio > Constants.Page.ResolutionWidth) {
+        Constants.Page.ResolutionRatio = Constants.Page.ResolutionWidth / (window.screen.width * window.devicePixelRatio);
+    }
 
-    // Show stats on page (framerate)
+    // Show stats (framerate)
     // stats = new Stats();
     // document.body.appendChild(stats.dom);
 
@@ -103,35 +99,26 @@ function initializeWorld() {
         }
     }
 
-    worldReference = worlds[0].mesh;
-
-    let star1 = new Star(worldReference, 200, 100, 170, 50, 1.3);
-    //let star2 = new Star(worldReference, 50, 80, 100, 50, 1);
+    let star1 = new Star(200, 100, 170, 50, 1.3);
+    //let star2 = new Star(50, 80, 100, 50, 1);
 
     scene.add(star1.light);
-    // scene.add(star2.light);
-
-    // Don't show stars (too many objects cause low frame rates)
-    // scene.add(star1.mesh);
-    // scene.add(star2.mesh);
 
     //light helper
     // const helper = new THREE.CameraHelper(star1.light.shadow.camera);
     // scene.add(helper);
-    // const helper2 = new THREE.CameraHelper(star2.light.shadow.camera);
-    // scene.add(helper2);
 
     // Set up forests, clouds, and rain for each world plane
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         for (let j = 0; j < worlds[i].numForests; j++) {
-            let forest = new Forest(Constants.Forest.TreesCount - 1, worldReference);
+            let forest = new Forest(Constants.Forest.TreesCount - 1);
             grove[j] = forest.trees;
 
             worlds[i].mesh.add(forest.mesh);
         }
 
         for (let j = 0; j < worlds[i].numClouds; j++) {
-            clouds[i + j] = new Cloud(worldReference);
+            clouds[i + j] = new Cloud();
             worlds[i].mesh.add(clouds[i + j].mesh);
         }
     }
@@ -187,7 +174,7 @@ function initializeWorld() {
                 clouds[i].mesh.geometry.dispose();
                 clouds[i].mesh.material.dispose();
 
-                clouds[i] = new Cloud(worldReference);
+                clouds[i] = new Cloud();
                 worlds[0].mesh.add(clouds[i].mesh);
             }
         }
@@ -246,9 +233,6 @@ function initializeWorld() {
         // }
 
         renderer.render(scene, camera);
-        // console.log(camera.position.x);
-        // console.log(camera.position.y);
-        // console.log(camera.position.z);
     };
     animate();
 }

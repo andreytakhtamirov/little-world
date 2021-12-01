@@ -28,8 +28,15 @@ export default class Weather {
             case 4:
                 this.sceneBackground = new THREE.Color("rgb(198,209,234)");
                 this.sceneAmbientLight1 = new THREE.AmbientLight("rgb(131,131,131)", 0.3);
-                this.sceneAmbientLight2 = new THREE.AmbientLight("rgb(39,64,79)", 0.7);
+                this.sceneAmbientLight2 = new THREE.AmbientLight("rgb(39,48,79)", 0.7);
                 this.conditions = 'snowy';
+                break;
+            default:
+                // sunny
+                this.sceneBackground = new THREE.Color("rgb(186,212,255)");
+                this.sceneAmbientLight1 = new THREE.AmbientLight("rgb(236,222,136)", 0.3);
+                this.sceneAmbientLight2 = new THREE.AmbientLight("rgb(232,104,104)", 0.7);
+                this.conditions = 'sunny';
                 break;
         }
     }

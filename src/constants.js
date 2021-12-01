@@ -1,3 +1,4 @@
+const ResolutionWidth = 2560; // Keep resolution at 2560x1440 if greater
 var ResolutionRatio = 1;
 const WorldSidesCount = 1;
 const WorldRotationSpeed = 0.001;
@@ -24,6 +25,10 @@ export class Page {
 
     static set ResolutionRatio(newRatio) {
         ResolutionRatio = newRatio;
+    }
+
+    static get ResolutionWidth() {
+        return ResolutionWidth;
     }
 }
 
