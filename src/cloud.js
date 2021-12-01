@@ -4,7 +4,7 @@ import * as Constants from "./constants";
 import * as Colours from "./colours";
 
 export default class Cloud {
-    constructor(worldReference) {
+    constructor() {
         this.cloudRandomMovementX = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         this.cloudRandomMovementY = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         this.cloudRandomMovementZ = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
@@ -12,9 +12,9 @@ export default class Cloud {
         const particlesInEachCloud = 3;
 
         const cloudRotation = Math.random() * (360);
-        const cloudPositionX = Utils.randomNumber((-worldReference.geometry.parameters.width / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.width / 2) - cloudWidthHeightDepth);
+        const cloudPositionX = Utils.randomNumber((-Constants.World.Width / 2) + cloudWidthHeightDepth, (Constants.World.Width / 2) - cloudWidthHeightDepth);
         const cloudPositionY = Utils.randomNumber(10, 15);
-        const cloudPositionZ = Utils.randomNumber((-worldReference.geometry.parameters.depth / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.depth / 2) - cloudWidthHeightDepth);
+        const cloudPositionZ = Utils.randomNumber((-Constants.World.Depth / 2) + cloudWidthHeightDepth, (Constants.World.Depth / 2) - cloudWidthHeightDepth);
 
         this.particles = [];
 

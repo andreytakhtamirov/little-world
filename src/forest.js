@@ -4,11 +4,11 @@ import * as Constants from "./constants";
 import * as Colours from "./colours";
 
 export default class Forest {
-    constructor(treesCount, worldReference) {
+    constructor(treesCount) {
         this.trees = [];
 
         // First set up a center Tree for the forest. Other Tree meshes will be added to this mesh
-        let tree = new Tree(0, worldReference);
+        let tree = new Tree(0);
         this.trees[0] = tree.leaves;
         this.mesh = tree.mesh;
 
@@ -18,14 +18,14 @@ export default class Forest {
         const treeDepth = tree.mesh.geometry.parameters.depth;
 
         const positionX = Utils.randomNumber(-worldWidth + treeWidth + 5, worldWidth - treeWidth - 5);
-        const positionY = worldReference.geometry.parameters.height / 2 + this.mesh.geometry.parameters.height / 2;
+        const positionY = Constants.World.Height / 2 + this.mesh.geometry.parameters.height / 2;
         const positionZ = Utils.randomNumber(-worldDepth + treeDepth + 5, worldDepth - treeDepth - 5);
 
         this.mesh.position.set(positionX, positionY, positionZ);
 
 
         for (let i = 0; i < treesCount; i++) {
-            let tree = new Tree(-positionY, worldReference);
+            let tree = new Tree(-positionY);
             this.trees[i + 1] = tree.leaves;
             this.mesh.add(tree.mesh);
         }
@@ -33,7 +33,7 @@ export default class Forest {
 }
 
 class Tree {
-    constructor(yOffset, worldReference) {
+    constructor(yOffset) {
         // How many leaves are in each tree
         const leavesInTree = Utils.randomInteger(2, 3);
 
@@ -50,7 +50,7 @@ class Tree {
 
         // Tree location
         const treePositionX = Utils.randomNumber(-5, 5);
-        const treePositionY = worldReference.geometry.parameters.height / 2 + this.mesh.geometry.parameters.height / 2;
+        const treePositionY = Constants.World.Height / 2 + this.mesh.geometry.parameters.height / 2;
         const treePositionZ = Utils.randomNumber(-5, 5);
 
         this.mesh.position.set(treePositionX, treePositionY + yOffset, treePositionZ);
@@ -85,11 +85,7 @@ class Leaf {
 
         let leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
-        let leafLineMaterial = new THREE.LineBasicMaterial({color: Utils.shade(randomColour.getHexString(), -0.7)});
-        // let leafLine = new THREE.LineSegments(new THREE.EdgesGeometry(leafGeometry), leafLineMaterial);
-
         this.mesh = new THREE.Mesh(leafGeometry, leafMaterial);
-        // this.mesh.add(leafLine);
         this.mesh.castShadow = true;
         this.mesh.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
 
