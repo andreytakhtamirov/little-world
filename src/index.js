@@ -129,13 +129,13 @@ function initializeWorld() {
         cloudParticleMovementLoop[i] = Utils.randomInteger(1, Constants.Cloud.ParticleMoveTimeOut);
     }
 
-    document.addEventListener("pagehide", function () {
-        cancelAnimationFrame(animate);
-        animationActive = false;
-    });
-
-    document.addEventListener("pageshow", function () {
-        animationActive = true;
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            cancelAnimationFrame(animate);
+            animationActive = false;
+        } else {
+            animationActive = true;
+        }
     });
 
     let animate = function () {
