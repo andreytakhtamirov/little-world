@@ -52,7 +52,7 @@ function initializeWorld() {
     scene.add(new THREE.AmbientLight("rgb(255,255,255)", 0.3));
     scene.add(weather.sceneAmbientLight2);
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
-    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer = new THREE.WebGLRenderer({antialias: true, powerPreference: "high-performance"});
     if (window.screen.width * window.devicePixelRatio > Constants.Page.ResolutionWidth) {
         Constants.Page.ResolutionRatio = Constants.Page.ResolutionWidth / (window.screen.width * window.devicePixelRatio);
     }
@@ -129,13 +129,13 @@ function initializeWorld() {
         cloudParticleMovementLoop[i] = Utils.randomInteger(1, Constants.Cloud.ParticleMoveTimeOut);
     }
 
-    document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
-            cancelAnimationFrame(animate);
-            animationActive = false;
-        } else {
-            animationActive = true;
-        }
+    document.addEventListener("pagehide", function () {
+        cancelAnimationFrame(animate);
+        animationActive = false;
+    });
+
+    document.addEventListener("pageshow", function () {
+        animationActive = true;
     });
 
     let animate = function () {
