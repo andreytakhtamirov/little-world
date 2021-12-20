@@ -6,15 +6,15 @@ const WorldWidth = 30;
 const WorldHeight = 1;
 const WorldDepth = 30;
 
-const MinCloudsCount = 2;
+const MinCloudsCount = 1;
 const MaxCloudsCount = 5;
 const RainDropsPerCloud = 30;
-const CloudMovementSpeed = 0.01; // 0.001
-const CloudParticleMovementSpeed = 0.002; //0.002
-const CloudParticleMoveTimeOut = 3000;  //3000
+const CloudMovementSpeed = 0.004;
+const CloudParticleMovementSpeed = 0.001;
+const CloudParticleMoveTimeOut = 300;
 
-const MinNumOfForests = 2;
-const MaxNumOfForests = 3;
+const MinNumOfForests = 1;
+const MaxNumOfForests = 2;
 const TreesPerForest = 10;
 const LeafMovementSpeed = 0.02;
 
