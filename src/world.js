@@ -4,19 +4,24 @@ import * as Constants from "./constants";
 import * as Colours from "./colours";
 
 export default class World {
-    constructor() {
+    constructor(weather) {
         const worldWidth = Constants.World.Width;
         const worldHeight = Constants.World.Height;
         const worldDepth = Constants.World.Depth;
 
-        const worldGeometry = new THREE.BoxGeometry(worldWidth, worldHeight, worldDepth);
-        const grassMaterial = new THREE.MeshStandardMaterial({color: Colours.World.Grass});
-        let line = new THREE.LineSegments(new THREE.EdgesGeometry(worldGeometry),
-            new THREE.LineBasicMaterial({color: Colours.World.GrassOutline}));
+        let worldColour = Colours.World.Grass;
+        if (weather.conditions.includes('snowy')) {
+            worldColour = Colours.World.SnowyGrass;
+        }
+        const worldGeometry = new THREE.BoxBufferGeometry(worldWidth, worldHeight, worldDepth);
+        const grassMaterial = new THREE.MeshStandardMaterial({color: worldColour});
 
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
-        this.mesh.add(line);
         this.mesh.receiveShadow = true;
         this.numForests = Utils.randomInteger(Constants.Forest.MinCount, Constants.Forest.MaxCount)
+        this.numClouds = Utils.randomInteger(Constants.Cloud.MinCount, Constants.Cloud.MaxCount);
+        this.grove = [];
+        this.clouds = [];
+        this.snow = [];
     }
 }

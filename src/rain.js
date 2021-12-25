@@ -16,7 +16,7 @@ class RainDrop {
         const positionZ = Math.random() * (8 + 4) - 4;
 
         const rainDropMaterial = new THREE.MeshStandardMaterial({color: Colours.Rain.Material});
-        const rainDropGeometry = new THREE.BoxGeometry(rainDropWidthHeightDepth, rainDropWidthHeightDepth, rainDropWidthHeightDepth);
+        const rainDropGeometry = new THREE.BoxBufferGeometry(rainDropWidthHeightDepth, rainDropWidthHeightDepth, rainDropWidthHeightDepth);
         const rainDropLine = new THREE.LineSegments(new THREE.EdgesGeometry(rainDropGeometry), new THREE.LineBasicMaterial({color: Colours.Rain.Outline}));
 
         this.mesh = new THREE.Mesh(rainDropGeometry, rainDropMaterial);

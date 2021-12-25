@@ -4,17 +4,17 @@ import * as Constants from "./constants";
 import * as Colours from "./colours";
 
 export default class Cloud {
-    constructor(worldReference) {
+    constructor() {
         this.cloudRandomMovementX = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
-        this.cloudRandomMovementY = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
+        this.cloudRandomMovementY = 0;
         this.cloudRandomMovementZ = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         const cloudWidthHeightDepth = Utils.randomNumber(1, 4);
         const particlesInEachCloud = 3;
 
         const cloudRotation = Math.random() * (360);
-        const cloudPositionX = Utils.randomNumber((-worldReference.geometry.parameters.width / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.width / 2) - cloudWidthHeightDepth);
-        const cloudPositionY = Utils.randomNumber(10, 15);
-        const cloudPositionZ = Utils.randomNumber((-worldReference.geometry.parameters.depth / 2) + cloudWidthHeightDepth, (worldReference.geometry.parameters.depth / 2) - cloudWidthHeightDepth);
+        const cloudPositionX = Utils.randomNumber((-Constants.World.Width / 2) + cloudWidthHeightDepth, (Constants.World.Width / 2) - cloudWidthHeightDepth);
+        const cloudPositionY = Utils.randomNumber(15, 20);
+        const cloudPositionZ = Utils.randomNumber((-Constants.World.Depth / 2) + cloudWidthHeightDepth, (Constants.World.Depth / 2) - cloudWidthHeightDepth);
 
         this.particles = [];
 
@@ -30,13 +30,24 @@ export default class Cloud {
 
         this.mesh.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
         this.mesh.rotation.y = cloudRotation;
+
+        this.movement = 0;
+        this.movementCounter = 0;
+
+        this.snow = [];
+
+        this.resetMovement();
+    }
+
+    resetMovement() {
+        this.movement = Utils.randomInteger(Constants.Cloud.ParticleMoveTimeOut / 2, Constants.Cloud.ParticleMoveTimeOut);
     }
 }
 
 class CloudParticle {
     constructor(cloudWidthHeightDepth) {
         const cloudMaterial = new THREE.MeshStandardMaterial({color: Colours.Cloud.Material});
-        const cloudGeometry = new THREE.BoxGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
+        const cloudGeometry = new THREE.BoxBufferGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
 
         this.mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
 

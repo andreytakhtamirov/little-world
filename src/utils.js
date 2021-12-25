@@ -31,7 +31,6 @@ export default class Utils {
     }
 
     static shade(col, light) {
-        console.log("colour: " + col.toString());
         let r = parseInt(col.substr(1, 2), 16);
         let g = parseInt(col.substr(3, 2), 16);
         let b = parseInt(col.substr(5, 2), 16);
