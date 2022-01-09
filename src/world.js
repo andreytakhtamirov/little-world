@@ -20,7 +20,7 @@ export default class World {
         this.mesh.receiveShadow = true;
         this.numForests = Utils.randomInteger(Constants.Forest.MinCount, Constants.Forest.MaxCount)
         this.numClouds = Utils.randomInteger(Constants.Cloud.MinCount, Constants.Cloud.MaxCount);
-        this.grove = [];
+        this.forests = [];
         this.clouds = [];
         this.snow = [];
     }

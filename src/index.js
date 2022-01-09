@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import * as THREE from "three";
 import * as TWEEN from "@tweenjs/tween.js";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import Sun from "./Sun"
+import Sun from "./sun"
 import Forest from "./forest";
 import Utils from "./utils";
 import Cloud from "./cloud";
@@ -12,10 +12,9 @@ import * as Constants from "./constants";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Weather from "./weather";
 import Snow from "./snow";
-import Player from "./Player";
+import Player from "./player";
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader.js';
 import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader.js';
-import {MeshLambertMaterial, MeshPhongMaterial} from "three";
 
 class App extends Component {
     componentDidMount() {
@@ -68,7 +67,7 @@ function initializeWorld() {
     stats = new Stats();
     document.body.appendChild(stats.dom);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    // const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio * Constants.Page.ResolutionRatio);
     renderer.shadowMapEnabled = true;
@@ -116,8 +115,8 @@ function initializeWorld() {
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         for (let j = 0; j < worlds[i].numForests; j++) {
             let forest = new Forest(Constants.Forest.TreesCount - 1, weather);
-            worlds[i].grove[j] = forest.treeLeaves;
-            worlds[i].mesh.add(forest.mesh);
+            worlds[i].forests.push(forest.group);
+            worlds[i].mesh.add(forest.group);
         }
         if (weather.conditions === 'snowy') {
             // temporary as snow from different clouds will keep stacking
@@ -129,11 +128,13 @@ function initializeWorld() {
             worlds[i].mesh.add(cloud.mesh);
         }
     }
+    // camera.position.set(0, worldDepth * 1.2, worldWidth * 1.4);
+    // camera.rotation.set(Utils.getRadians(-40), 0, 0);
     camera.position.set(0, worldDepth * 1.7, worldWidth * 0.6);
     camera.rotation.set(Utils.getRadians(-70), 0, 0);
     light.position.copy(camera.position);
     light.rotation.copy(camera.rotation);
-    controls.update();
+    //controls.update();
 
     document.addEventListener("pagehide", function () {
         cancelAnimationFrame(animate);
@@ -144,9 +145,9 @@ function initializeWorld() {
         animationActive = true;
     });
 
-    controls.addEventListener('change', function () {
-        light.position.copy(camera.position);
-    });
+    // controls.addEventListener('change', function () {
+    //     light.position.copy(camera.position);
+    // });
 
     let player
     const mtlLoader = new MTLLoader();
@@ -156,6 +157,8 @@ function initializeWorld() {
         objLoader.load("/models/beaver.obj", function (obj) {
             obj.scale.set(1.1, 1.1, 1.1);
             obj.translateY(0.5);
+            obj.translateX(0.5);
+            obj.translateZ(0.5);
 
             obj.traverse(function (child) {
                 child.castShadow = true;
@@ -182,7 +185,7 @@ function initializeWorld() {
 
         for (let i = 0; i < worlds.length; i++) {
             animateClouds(worlds[i]);
-            detectPlayerHits(player, worlds[i].grove);
+            detectPlayerHits(player, worlds[i]);
         }
 
         // console.log("x:" + camera.position.x);
@@ -194,33 +197,32 @@ function initializeWorld() {
     animate();
 }
 
-function detectPlayerHits(player, grove) {
+function detectPlayerHits(player, world) {
     if (player == null || !player.isHitting) {
         return;
     }
-    for (let j = 0; j < grove.length; j++) {
-        for (let k = 0; k < grove[j].length; k++) {
-            for (let m = 0; m < grove[j][k].length; m++) {
-                let tree = grove[j][k][m];
-                let treePosition = new THREE.Vector3();
-                let playerPosition = new THREE.Vector3();
-                player.mesh.updateMatrixWorld(true);
-                tree.mesh.updateMatrixWorld(true);
-                tree.mesh.getWorldPosition(treePosition);
-                player.mesh.getWorldPosition(playerPosition);
+    let forests = world.forests;
 
-                let distance = Math.pow(player.hitBox, 2) - (Math.pow(playerPosition.x-treePosition.x, 2) + Math.pow(playerPosition.z-treePosition.z, 2));
-                if (distance > 0) {
-                    //tree.mesh.geometry.scale(3, 3, 3);
-                    if (tree.mesh.parent != null && tree.mesh.parent.parent != null) {
-                        tree.mesh.parent.parent.remove(tree.mesh.parent);
-                        tree.mesh.parent.updateMatrix();
-                        player.isHitting = false;
-                        return;
-                    }
-                }
+    let closestTree = null;
+    let closestHitDistance = 0; // closest distance will be the largest one
+
+    for (let i = 0; i < forests.length; i++) {
+        let trees = forests[i].children;
+
+        for (let j = 0; j < trees.length; j++) {
+            let tree = trees[j];
+
+            let distance = distanceFromPointToCircle(player.hitBox, player.mesh, tree);
+            if (distance > 0 && distance > closestHitDistance) {
+                closestHitDistance = distance;
+                closestTree = tree;
             }
         }
+    }
+
+    if (closestTree != null) {
+        player.isHitting = false;
+        closestTree.parent.remove(closestTree);
     }
 }
 
@@ -279,7 +281,7 @@ function animateClouds(parentWorld) {
 }
 
 function animateSnow(parentWorld, parentCloud, snow) {
-    let grove = parentWorld.grove;
+    let forests = parentWorld.forests;
     let snowProbability = Utils.randomInteger(1, 40);
     if (snowProbability === 10) {
         snow[snow.length] = new Snow(parentCloud.mesh);
@@ -322,10 +324,16 @@ function animateSnow(parentWorld, parentCloud, snow) {
             continue;
         }
 
-        for (let j = 0; j < grove.length; j++) {
-            for (let k = 0; k < grove[j].length; k++) {
-                for (let m = 0; m < grove[j][k].length; m++) {
-                    if (detectCollision(snow[i].mesh, grove[j][k][m].mesh)) {
+        for (let j = 0; j < forests.length; j++) {
+            let trees = forests[j].children;
+
+            for (let k = 0; k < trees.length; k++) {
+                let treeLeaves = trees[k].children;
+
+                for (let m = 0; m < treeLeaves.length; m++) {
+                    let treeLeaf = treeLeaves[m];
+
+                    if (detectCollision(snow[i].mesh, treeLeaf)) {
                         snowCollision(snow[i], 5);
 
                         let collidedWithSnow = false;
@@ -367,6 +375,17 @@ function animateSnow(parentWorld, parentCloud, snow) {
     }
 }
 
+function distanceFromPointToCircle(circleRadius, hittingObject, targetObject) {
+    let object1Position = new THREE.Vector3();
+    let object2Position = new THREE.Vector3();
+    hittingObject.updateMatrixWorld(true);
+    targetObject.updateMatrixWorld(true);
+    targetObject.getWorldPosition(object1Position);
+    hittingObject.getWorldPosition(object2Position);
+
+    return Math.pow(circleRadius, 2) - (Math.pow(object1Position.x - object2Position.x, 2) + Math.pow(object1Position.z - object2Position.z, 2));
+}
+
 function detectCollision(object1, object2) {
     object1.geometry.computeBoundingBox();
     object2.geometry.computeBoundingBox();
@@ -396,13 +415,6 @@ function detectSnowCollision(object1, object2) {
     box2.applyMatrix4(object2.matrixWorld);
 
     return box1.intersectsBox(box2);
-}
-
-function detectFullCollision(object1, object2) {
-    let object1Box = new THREE.Box3().setFromObject(object1);
-    let object2Box = new THREE.Box3().setFromObject(object2)
-
-    return object2Box.containsBox(object1Box);
 }
 
 function onWindowResize() {

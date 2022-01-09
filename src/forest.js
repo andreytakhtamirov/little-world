@@ -5,36 +5,18 @@ import * as Colours from "./colours";
 
 export default class Forest {
     constructor(treesCount, weather) {
-        this.treeLeaves = [];
-
         // First set up a center Tree for the forest. Other Tree meshes will be added to this mesh
-        let tree = new Tree(0, weather);
-        this.treeLeaves[0] = tree.leaves;
-        this.mesh = tree.mesh;
-
-        const worldWidth = Constants.World.Width / 2;
-        const worldDepth = Constants.World.Depth / 2;
-        const treeWidth = tree.mesh.geometry.parameters.width;
-        const treeDepth = tree.mesh.geometry.parameters.depth;
-
-        let treeDistance = Constants.Forest.TreesCount * 0.8;
-        const positionX = Utils.randomNumber(-worldWidth + treeWidth + treeDistance, worldWidth - treeWidth - treeDistance);
-        const positionY = Constants.World.Height / 2 + this.mesh.geometry.parameters.height / 2;
-        const positionZ = Utils.randomNumber(-worldDepth + treeDepth + treeDistance, worldDepth - treeDepth - treeDistance);
-
-        this.mesh.position.set(positionX, positionY, positionZ);
-
+        this.group = new THREE.Group();
 
         for (let i = 0; i < treesCount; i++) {
-            let tree = new Tree(-positionY, weather);
-            this.treeLeaves[i + 1] = tree.leaves;
-            this.mesh.add(tree.mesh);
+            let tree = new Tree(weather);
+            this.group.add(tree.mesh);
         }
     }
 }
 
 class Tree {
-    constructor(yOffset, weather) {
+    constructor(weather) {
         // How many leaves are in each tree
         const leavesInTree = Utils.randomInteger(2, 3);
 
@@ -55,7 +37,7 @@ class Tree {
         const treePositionY = Constants.World.Height / 2 + this.mesh.geometry.parameters.height / 2;
         const treePositionZ = Utils.randomNumber(-treeDistance + stemDepth, treeDistance - stemDepth);
 
-        this.mesh.position.set(treePositionX, treePositionY + yOffset, treePositionZ);
+        this.mesh.position.set(treePositionX, treePositionY, treePositionZ);
         this.mesh.castShadow = true;
 
         this.leaves = [];

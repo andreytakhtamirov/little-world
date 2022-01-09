@@ -15,7 +15,7 @@ export default class Player {
         cube = obj;
         this.mesh = cube;
 
-        this.defaultMovement = 3;
+        this.defaultMovement = 2.4;
         this.minMovement = 1.1;
         this.movement = this.defaultMovement;
         this.isHitting = null;
@@ -27,7 +27,7 @@ export default class Player {
         let tweenDown;
 
         let kJump = 0.01;
-        let kWalk = 1.60;
+        let kWalk = 1.90;
 
         let durationUp = 1;
         let durationTurn = 40;
