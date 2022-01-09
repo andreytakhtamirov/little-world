@@ -14,7 +14,7 @@ export default class World {
             worldColour = Colours.World.SnowyGrass;
         }
         const worldGeometry = new THREE.BoxBufferGeometry(worldWidth, worldHeight, worldDepth);
-        const grassMaterial = new THREE.MeshStandardMaterial({color: worldColour});
+        const grassMaterial = new THREE.MeshPhongMaterial({color: worldColour});
 
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
         this.mesh.receiveShadow = true;

@@ -14,7 +14,7 @@ const CloudParticleMovementSpeed = 0.001;
 const CloudParticleMoveTimeOut = 300;
 
 const MinNumOfForests = 1;
-const MaxNumOfForests = 2;
+const MaxNumOfForests = 3;
 const TreesPerForest = 10;
 const LeafMovementSpeed = 0.02;
 

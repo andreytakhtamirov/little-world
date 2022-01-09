@@ -1,8 +1,9 @@
 import React, {Component} from "react";
 import ReactDOM from "react-dom";
 import * as THREE from "three";
+import * as TWEEN from "@tweenjs/tween.js";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import Star from "./star"
+import Sun from "./Sun"
 import Forest from "./forest";
 import Utils from "./utils";
 import Cloud from "./cloud";
@@ -11,6 +12,10 @@ import * as Constants from "./constants";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Weather from "./weather";
 import Snow from "./snow";
+import Player from "./Player";
+import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader.js';
+import {MTLLoader} from 'three/examples/jsm/loaders/MTLLoader.js';
+import {MeshLambertMaterial, MeshPhongMaterial} from "three";
 
 class App extends Component {
     componentDidMount() {
@@ -53,22 +58,21 @@ function initializeWorld() {
         scene.add(weather.ambientLights[i]);
     }
 
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
+    camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({antialias: true, powerPreference: "high-performance"});
     if (window.screen.width * window.devicePixelRatio > Constants.Page.ResolutionWidth) {
         Constants.Page.ResolutionRatio = Constants.Page.ResolutionWidth / (window.screen.width * window.devicePixelRatio);
     }
 
     // Show stats (framerate)
-    // stats = new Stats();
-    // document.body.appendChild(stats.dom);
+    stats = new Stats();
+    document.body.appendChild(stats.dom);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor();
     renderer.setPixelRatio(window.devicePixelRatio * Constants.Page.ResolutionRatio);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.shadowMapEnabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rootElement.appendChild(renderer.domElement);
 
     const worldWidth = Constants.World.Width;
@@ -101,7 +105,7 @@ function initializeWorld() {
         }
     }
 
-    let star1 = new Star(200, 100, 170, 50, weather.sunColour, 1.3);
+    let star1 = new Sun(70, 100, 0, 50, weather.sunColour, 1);
     scene.add(star1.light);
 
     //light helper
@@ -112,8 +116,7 @@ function initializeWorld() {
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         for (let j = 0; j < worlds[i].numForests; j++) {
             let forest = new Forest(Constants.Forest.TreesCount - 1, weather);
-            worlds[i].grove[j] = forest.trees;
-
+            worlds[i].grove[j] = forest.treeLeaves;
             worlds[i].mesh.add(forest.mesh);
         }
         if (weather.conditions === 'snowy') {
@@ -126,8 +129,10 @@ function initializeWorld() {
             worlds[i].mesh.add(cloud.mesh);
         }
     }
-    camera.position.set(-15, 38, 80);
+    camera.position.set(0, worldDepth * 1.7, worldWidth * 0.6);
+    camera.rotation.set(Utils.getRadians(-70), 0, 0);
     light.position.copy(camera.position);
+    light.rotation.copy(camera.rotation);
     controls.update();
 
     document.addEventListener("pagehide", function () {
@@ -143,7 +148,28 @@ function initializeWorld() {
         light.position.copy(camera.position);
     });
 
+    let player
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load("/models/beaver.mtl", mtlParseResult => {
+        const objLoader = new OBJLoader();
+        objLoader.setMaterials(mtlParseResult);
+        objLoader.load("/models/beaver.obj", function (obj) {
+            obj.scale.set(1.1, 1.1, 1.1);
+            obj.translateY(0.5);
+
+            obj.traverse(function (child) {
+                child.castShadow = true;
+            });
+
+            player = new Player(obj, camera);
+            worlds[0].mesh.add(player.mesh);
+        });
+    });
+
+
     let animate = function () {
+        TWEEN.update();
+
         if (!animationActive) {
             // prevent multiple animate() calls when switching to/from tab quickly
             return;
@@ -156,11 +182,46 @@ function initializeWorld() {
 
         for (let i = 0; i < worlds.length; i++) {
             animateClouds(worlds[i]);
+            detectPlayerHits(player, worlds[i].grove);
         }
+
+        // console.log("x:" + camera.position.x);
+        // console.log("y:" + camera.position.y);
+        // console.log("z:" + camera.position.z);
 
         renderer.render(scene, camera);
     };
     animate();
+}
+
+function detectPlayerHits(player, grove) {
+    if (player == null || !player.isHitting) {
+        return;
+    }
+    for (let j = 0; j < grove.length; j++) {
+        for (let k = 0; k < grove[j].length; k++) {
+            for (let m = 0; m < grove[j][k].length; m++) {
+                let tree = grove[j][k][m];
+                let treePosition = new THREE.Vector3();
+                let playerPosition = new THREE.Vector3();
+                player.mesh.updateMatrixWorld(true);
+                tree.mesh.updateMatrixWorld(true);
+                tree.mesh.getWorldPosition(treePosition);
+                player.mesh.getWorldPosition(playerPosition);
+
+                let distance = Math.pow(player.hitBox, 2) - (Math.pow(playerPosition.x-treePosition.x, 2) + Math.pow(playerPosition.z-treePosition.z, 2));
+                if (distance > 0) {
+                    //tree.mesh.geometry.scale(3, 3, 3);
+                    if (tree.mesh.parent != null && tree.mesh.parent.parent != null) {
+                        tree.mesh.parent.parent.remove(tree.mesh.parent);
+                        tree.mesh.parent.updateMatrix();
+                        player.isHitting = false;
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 function animateClouds(parentWorld) {

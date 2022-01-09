@@ -61,7 +61,7 @@ class CloudParticle {
         this.mesh.position.set(particlePositionX, particlePositionY, particlePositionZ);
 
         this.mesh.material.transparent = true;
-        this.mesh.material.opacity = Utils.randomNumber(0.3, 0.9);
+        this.mesh.material.opacity = Utils.randomNumber(0.2, 0.5);
         this.mesh.renderOrder = 2;
 
         this.movementXYZ = [];
