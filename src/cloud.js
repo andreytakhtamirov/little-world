@@ -5,9 +5,6 @@ import * as Colours from "./colours";
 
 export default class Cloud {
     constructor() {
-        this.cloudRandomMovementX = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
-        this.cloudRandomMovementY = 0;
-        this.cloudRandomMovementZ = Utils.randomNumber(-Constants.Cloud.MoveSpeed, Constants.Cloud.MoveSpeed);
         const cloudWidthHeightDepth = Utils.randomNumber(1, 4);
         const particlesInEachCloud = 3;
 
@@ -18,18 +15,15 @@ export default class Cloud {
 
         this.particles = [];
 
-        let cloudParticle = new CloudParticle(cloudWidthHeightDepth);
-        this.particles[0] = cloudParticle;
-        this.mesh = cloudParticle.mesh;
+        this.group = new THREE.Group();
 
         for (let i = 0; i < particlesInEachCloud - 1; i++) {
             let cloudParticle = new CloudParticle(cloudWidthHeightDepth);
-            this.particles[i + 1] = cloudParticle;
-            this.mesh.add(cloudParticle.mesh);
+            this.group.add(cloudParticle.mesh);
         }
 
-        this.mesh.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
-        this.mesh.rotation.y = cloudRotation;
+        this.group.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
+        this.group.rotation.y = cloudRotation;
 
         this.movement = 0;
         this.movementCounter = 0;

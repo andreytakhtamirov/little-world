@@ -125,7 +125,7 @@ function initializeWorld() {
         for (let j = 0; j < worlds[i].numClouds; j++) {
             let cloud = new Cloud();
             worlds[i].clouds.push(cloud);
-            worlds[i].mesh.add(cloud.mesh);
+            worlds[i].mesh.add(cloud.group);
         }
     }
     // camera.position.set(0, worldDepth * 1.2, worldWidth * 1.4);
@@ -232,29 +232,32 @@ function animateClouds(parentWorld) {
     // ---------------- SNOW MOVEMENT ---------------- //
     if (weather.conditions === 'snowy') {
         for (let i = 0; i < clouds.length; i++) {
-            animateSnow(parentWorld, clouds[i], clouds[i].snow);
+            animateSnow(parentWorld, clouds, clouds[i].snow);
         }
     }
 
-    // ---------------- WHOLE CLOUD MOVEMENT ---------------- //
+    // ---------------- WHOLE CLOUD MOVEMENT ---------------- //ss
     for (let i = 0; i < clouds.length; i++) {
-        clouds[i].mesh.translateX(clouds[i].cloudRandomMovementX);
-        clouds[i].mesh.translateY(clouds[i].cloudRandomMovementY);
-        clouds[i].mesh.translateZ(clouds[i].cloudRandomMovementZ);
+        let cloud = clouds[i];
+        cloud.group.translateX(Constants.Cloud.WindSpeedX);
+        cloud.group.translateY(Constants.Cloud.WindSpeedY);
+        cloud.group.translateX(Constants.Cloud.WindSpeedZ);
 
-        if (clouds[i].mesh.position.x > parentWorld.mesh.geometry.parameters.width / 2 ||
-            clouds[i].mesh.position.x < -parentWorld.mesh.geometry.parameters.width / 2 ||
-            clouds[i].mesh.position.y > 30 ||
-            clouds[i].mesh.position.y < 10 ||
-            clouds[i].mesh.position.z > parentWorld.mesh.geometry.parameters.depth / 2 ||
-            clouds[i].mesh.position.z < -parentWorld.mesh.geometry.parameters.depth / 2) {
+        if (cloud.group.position.x > parentWorld.mesh.geometry.parameters.width / 2 ||
+            cloud.group.position.x < -parentWorld.mesh.geometry.parameters.width / 2 ||
+            cloud.group.position.y > 30 ||
+            cloud.group.position.y < 10 ||
+            cloud.group.position.z > parentWorld.mesh.geometry.parameters.depth / 2 ||
+            cloud.group.position.z < -parentWorld.mesh.geometry.parameters.depth / 2) {
 
-            parentWorld.mesh.remove(clouds[i].mesh);
-            clouds[i].mesh.geometry.dispose();
-            clouds[i].mesh.material.dispose();
+            // for (let j = 0; j < cloud.group.children.length; j++) {
+            //     cloud.group.children[j].geometry.dispose();
+            //     cloud.group.children[j].material.dispose();
+            // }
+            parentWorld.mesh.remove(cloud.group);
 
             clouds[i] = new Cloud();
-            parentWorld.mesh.add(clouds[i].mesh);
+            parentWorld.mesh.add(clouds[i].group);
         }
     }
 

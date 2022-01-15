@@ -1,3 +1,5 @@
+import Utils from "./utils";
+
 const ResolutionWidth = 2560; // Keep resolution at 2560x1440 if greater
 var ResolutionRatio = 1;
 const WorldSidesCount = 1;
@@ -12,6 +14,10 @@ const RainDropsPerCloud = 30;
 const CloudMovementSpeed = 0.004;
 const CloudParticleMovementSpeed = 0.001;
 const CloudParticleMoveTimeOut = 300;
+
+const WindSpeedX = Utils.randomNumber(-CloudMovementSpeed, CloudMovementSpeed);
+const WindSpeedY = 0;
+const WindSpeedZ = Utils.randomNumber(-CloudMovementSpeed, CloudMovementSpeed);
 
 const MinNumOfForests = 1;
 const MaxNumOfForests = 3;
@@ -77,6 +83,18 @@ export class Cloud {
 
     static get ParticleMoveTimeOut() {
         return CloudParticleMoveTimeOut;
+    }
+
+    static get WindSpeedX() {
+        return WindSpeedX;
+    }
+
+    static get WindSpeedY() {
+        return WindSpeedY;
+    }
+
+    static get WindSpeedZ() {
+        return WindSpeedZ;
     }
 }
 
