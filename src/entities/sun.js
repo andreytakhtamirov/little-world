@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import * as Colours from "./colours"
-import * as Constants from "./constants";
+import * as Constants from "../worldProperties/constants";
+import * as Colours from "../worldProperties/colours"
 
 export default class Sun {
     constructor(positionX, positionY, positionZ, size, lightColour, intensity) {

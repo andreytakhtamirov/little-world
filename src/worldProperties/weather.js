@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import * as Colours from "./colours";
+import * as Colours from "../worldProperties/colours"
 
 export default class Weather {
     constructor(conditions) {

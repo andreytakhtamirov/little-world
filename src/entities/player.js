@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import Utils from "./utils";
+import Utils from "../utils";
 import * as TWEEN from "@tweenjs/tween.js";
-import * as Constants from "./constants";
+import * as Constants from "../worldProperties/constants";
 
 export default class Player {
     constructor(obj, camera) {
@@ -26,12 +26,12 @@ export default class Player {
         let tweenMove;
         let tweenDown;
 
-        let kJump = 0.01;
+        let kJump = 0.5;
         let kWalk = 1.90;
 
         let durationUp = 1;
         let durationTurn = 40;
-        let durationMove = 180;
+        let durationMove = 280;
         let durationDown = 1;
 
         let jumpHeight = this.movement * kJump;
@@ -71,6 +71,7 @@ export default class Player {
                         y: position.y
                     }, durationMove).onUpdate(function ({x, y}) {
                         camera.position.x += Math.abs(cube.position.x - x);
+                        camera.rotation.z -= Utils.getRadians(Math.abs(cube.position.x - x) * 0.05);
                         cube.position.x = x;
                         cube.position.y = y;
                     });
@@ -83,6 +84,10 @@ export default class Player {
                     }).onComplete(function () {
                         moveLock = 0;
                     });
+
+                    if (cube.rotation.y === Utils.getRadians(90)) {
+                        tweenTurn.duration(0);
+                    }
                     tweenUp.chain(tweenTurn);
                     tweenTurn.chain(tweenMove);
                     tweenMove.chain(tweenDown);
@@ -120,7 +125,8 @@ export default class Player {
                         x: position.x - move,
                         y: position.y
                     }, durationMove).onUpdate(function ({x, y}) {
-                        camera.position.x += -Math.abs(cube.position.x - x);
+                        camera.position.x -= Math.abs(cube.position.x - x);
+                        camera.rotation.z += Utils.getRadians(Math.abs(cube.position.x - x) * 0.05);
                         cube.position.x = x;
                         cube.position.y = y;
                     });
@@ -133,6 +139,10 @@ export default class Player {
                     }).onComplete(function () {
                         moveLock = 0;
                     });
+
+                    if (cube.rotation.y === Utils.getRadians(270)) {
+                        tweenTurn.duration(0);
+                    }
                     tweenUp.chain(tweenTurn);
                     tweenTurn.chain(tweenMove);
                     tweenMove.chain(tweenDown);
@@ -170,7 +180,9 @@ export default class Player {
                         z: position.z + move,
                         y: position.y
                     }, durationMove).onUpdate(function ({z, y}) {
-                        camera.position.z += Math.abs(cube.position.z - z);
+                        camera.position.z += Math.abs((cube.position.z - z) * 0.9);
+                        camera.position.y -= Math.abs((cube.position.z - z) * 0.3);
+                        camera.rotation.x += Utils.getRadians(Math.abs(cube.position.z - z) * 0.45);
                         cube.position.z = z;
                         cube.position.y = y;
                     });
@@ -183,6 +195,10 @@ export default class Player {
                     }).onComplete(function () {
                         moveLock = 0;
                     });
+
+                    if (cube.rotation.y === Utils.getRadians(0)) {
+                        tweenTurn.duration(0);
+                    }
                     tweenUp.chain(tweenTurn);
                     tweenTurn.chain(tweenMove);
                     tweenMove.chain(tweenDown);
@@ -220,7 +236,9 @@ export default class Player {
                         z: position.z - move,
                         y: position.y
                     }, durationMove).onUpdate(function ({z, y}) {
-                        camera.position.z += -Math.abs(cube.position.z - z);
+                        camera.position.z -= Math.abs((cube.position.z - z) * 0.9);
+                        camera.position.y += Math.abs((cube.position.z - z) * 0.3);
+                        camera.rotation.x -= Utils.getRadians(Math.abs(cube.position.z - z) * 0.45);
                         cube.position.z = z;
                         cube.position.y = y;
                     });
@@ -233,6 +251,10 @@ export default class Player {
                     }).onComplete(function () {
                         moveLock = 0;
                     });
+
+                    if (cube.rotation.y === Utils.getRadians(180)) {
+                        tweenTurn.duration(0);
+                    }
                     tweenUp.chain(tweenTurn);
                     tweenTurn.chain(tweenMove);
                     tweenMove.chain(tweenDown);
@@ -303,7 +325,7 @@ export default class Player {
                     tweenUp.start();
                 }
             }
-        }, 5);
+        }, 50); //250????
     }
 
     set setMovement(newMovement) {

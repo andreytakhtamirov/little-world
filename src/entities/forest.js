@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import Utils from "./utils";
-import * as Constants from "./constants";
-import * as Colours from "./colours";
+import Utils from "../utils";
+import * as Constants from "../worldProperties/constants";
+import * as Colours from "../worldProperties/colours"
 
 export default class Forest {
     constructor(treesCount, weather) {
@@ -69,11 +69,11 @@ class Leaf {
             randomColour = new THREE.Color(Colours.Tree.SnowyLeaves[(Utils.randomInteger(0, Colours.Tree.SnowyLeaves.length - 1))]);
         }
         let leafMaterial = new THREE.MeshLambertMaterial({color: randomColour});
-
         let leafGeometry = new THREE.BoxBufferGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
         this.mesh = new THREE.Mesh(leafGeometry, leafMaterial);
         this.mesh.castShadow = true;
+        this.mesh.material.transparent = true;
         this.mesh.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
 
         this.movementXYZ = [];

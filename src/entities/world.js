@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import Utils from "./utils";
-import * as Constants from "./constants";
-import * as Colours from "./colours";
+import Utils from "../utils";
+import * as Constants from "../worldProperties/constants";
+import * as Colours from "../worldProperties/colours"
 
 export default class World {
     constructor(weather) {
