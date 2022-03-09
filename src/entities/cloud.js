@@ -18,8 +18,8 @@ export default class Cloud {
         this.group = new THREE.Group();
 
         for (let i = 0; i < particlesInEachCloud - 1; i++) {
-            let cloudParticle = new CloudParticle(cloudWidthHeightDepth);
-            this.group.add(cloudParticle.mesh);
+            let cloudPart = new CloudPart(cloudWidthHeightDepth);
+            this.group.add(cloudPart.mesh);
         }
 
         this.group.position.set(cloudPositionX, cloudPositionY, cloudPositionZ);
@@ -38,7 +38,7 @@ export default class Cloud {
     }
 }
 
-class CloudParticle {
+class CloudPart {
     constructor(cloudWidthHeightDepth) {
         const cloudMaterial = new THREE.MeshStandardMaterial({color: Colours.Cloud.Material});
         const cloudGeometry = new THREE.BoxBufferGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);

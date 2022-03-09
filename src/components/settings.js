@@ -30,7 +30,9 @@ const style = {
     position: 'absolute',
     top: 20,
     right: 20,
-    width: 360,
+    width: "30%",
+    minWidth: 100,
+    maxWidth: 360,
     bgcolor: '#fff',
     border: '2px solid #000',
     p: 2,
@@ -38,10 +40,13 @@ const style = {
 
 const settingsIconStyle = {
     position: "absolute",
-    transform: "scale(2)",
-    right: 10,
-    top: 10,
-    padding: 0
+    right: 20,
+    top: 20,
+    padding: 0,
+};
+
+const iconFontSize = {
+    fontSize: 40,
 };
 
 const resolutionSettingsStyle = {
@@ -49,7 +54,7 @@ const resolutionSettingsStyle = {
     marginLeft: 10,
 };
 
-export default function Settings({onChange, setResolution}) {
+export default function Settings({ onChange, setResolution }) {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -65,7 +70,7 @@ export default function Settings({onChange, setResolution}) {
                     disableFocusRipple={true}
                     disableRipple={true}
                     color={"primary"}>
-                    <SettingsIcon />
+                    <SettingsIcon style={iconFontSize} />
                 </IconButton>
                 <Modal
                     open={open}

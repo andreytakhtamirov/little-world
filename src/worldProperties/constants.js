@@ -1,7 +1,7 @@
 import Utils from "../utils";
 
-const ResolutionWidths = [640, 1920, 2560, 4000]; // Keep resolution at 2560x1440 if greater
-var SetResolutionWidth = 0;
+const ResolutionWidths = [720, 1920, 2560, 4000];
+var SetResolutionWidth = 1;
 var ResolutionRatio = 1;
 const WorldSidesCount = 1;
 const WorldRotationSpeed = 0.001;

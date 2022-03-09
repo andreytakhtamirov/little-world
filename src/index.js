@@ -14,11 +14,11 @@ import World from "./entities/world";
 import * as Constants from "./worldProperties/constants";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Weather from "./worldProperties/weather";
-import Snow from "./entities/children/snow";
+import Snow from "./entities/cloudParticles/snow";
 import Player from "./entities/player";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
-import Sparkle from "./entities/children/sparkle";
+import Sparkle from "./entities/cloudParticles/sparkle";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Settings from "./components/settings";
@@ -72,10 +72,9 @@ class App extends Component {
 
     refreshButtonStyle = {
         position: "absolute",
-        transform: "translate(-50%, -50%) scale(4)",
-        fontSize: "3em",
+        transform: "translate(-50%, -50%)",
         left: '50%',
-        bottom: '10%',
+        bottom: '0px',
         padding: 0,
     };
 
@@ -170,7 +169,7 @@ class App extends Component {
                         disableFocusRipple={true}
                         disableRipple={true}
                         color={"primary"}>
-                        <RefreshRoundedIcon />
+                        <RefreshRoundedIcon style={{ fontSize: 50 }} />
                     </IconButton>
                 </div>
             </ThemeProvider>
@@ -196,28 +195,31 @@ var controls;
 function initializeScene() {
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    setResolution(Constants.Page.ResolutionWidths[1]); // Set default to medium
-
+    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[1]; // Set default to medium
+    setResolution(Constants.Page.SetResolutionWidth);
 
     // Show stats (framerate)
-    stats = new Stats();
-    document.body.appendChild(stats.dom);
+    // stats = new Stats();
+    // document.body.appendChild(stats.dom);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio * Constants.Page.ResolutionRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rootElement.appendChild(renderer.domElement);
     controls = new OrbitControls(camera, renderer.domElement);
     controls.update();
+
+    camera.zoom = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
 }
 
 function setResolution(resolutionWidth) {
     Constants.Page.SetResolutionWidth = resolutionWidth;
-    Constants.Page.ResolutionRatio = resolutionWidth / (window.screen.width * window.devicePixelRatio);
-    renderer.setPixelRatio(window.devicePixelRatio * Constants.Page.ResolutionRatio);
+    let screenWidth = window.innerWidth * window.devicePixelRatio;
+    Constants.Page.ResolutionRatio = resolutionWidth / screenWidth;
+    renderer.setPixelRatio(Constants.Page.ResolutionRatio);
 }
 
 function purgeWorld(obj) {
@@ -370,9 +372,9 @@ function initializeWorld() {
         }
 
         for (let j = 0; j < world.clouds.length; j++) {
-            let cloudParticles = world.clouds[j].group.children;
-            for (let k = 0; k < cloudParticles.length; k++) {
-                let particle = cloudParticles[k];
+            let cloudParts = world.clouds[j].group.children;
+            for (let k = 0; k < cloudParts.length; k++) {
+                let particle = cloudParts[k];
                 let particleY = particle.position.y;
                 particle.position.set(particle.position.x, particle.position.y + 60, particle.position.z);
                 particle.visible = false;
@@ -388,7 +390,7 @@ function initializeWorld() {
 
                 animateCloud.easing(TWEEN.Easing.Back.Out);
                 let startOffset = worlds.length * world.forests.length * Constants.Forest.TreesCount * 60;
-                let rate = worlds.length * world.clouds.length * cloudParticles.length * 60;
+                let rate = worlds.length * world.clouds.length * cloudParts.length * 60;
                 animateCloud.delay(Utils.randomInteger(startOffset, rate));
                 animateCloud.start();
             }
@@ -782,6 +784,7 @@ function startAnimations() {
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
+    camera.zoom = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
     setResolution(Constants.Page.SetResolutionWidth);
