@@ -1,10 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
-import IconButton from '@mui/material/IconButton';
-import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import * as THREE from "three";
-import { Vector3 } from "three";
 import * as TWEEN from "@tweenjs/tween.js";
 import Sun from "./entities/sun"
 import Forest from "./entities/forest";
@@ -19,10 +15,11 @@ import Player from "./entities/player";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import Sparkle from "./entities/cloudParticles/sparkle";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { createTheme } from "@mui/material";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Settings from "./components/settings";
 import Helmet from "react-helmet"
+import Settings from "./components/settings";
+import ActionButtons from "./components/actionButtons";
 
 const theme = createTheme({
     palette: {
@@ -68,22 +65,6 @@ class App extends Component {
         top: '7%',
         fontFamily: theme.typography.fontFamily,
         color: theme.palette.primary.main,
-    };
-
-    refreshButtonStyle = {
-        position: "absolute",
-        transform: "translate(-50%, -50%)",
-        left: '50%',
-        bottom: '0px',
-        padding: 0,
-    };
-
-    playButtonStyle = {
-        position: "absolute",
-        transform: "translate(-50%, -50%) scale(4)",
-        left: '50%',
-        bottom: '10%',
-        padding: 0
     };
 
     onRefreshClick() {
@@ -149,30 +130,11 @@ class App extends Component {
             {/*<p style={this.titleStyle}>*/}
             {/*    In Your Own Little World!*/}
             {/*</p>*/}
-            <ThemeProvider theme={theme}>
-                <div style={this.refreshButtonStyle}>
-                    {/* <IconButton
-                        ref={this.playButton}
-                        aria-label="start game"
-                        onClick={this.onPlayClick}
-                        touch={"true"}
-                        disableFocusRipple={true}
-                        disableRipple={true}
-                        color={"primary"}>
-                        <PlayArrowOutlinedIcon />
-                    </IconButton> */}
-                    <IconButton
-                        ref={this.refreshButton}
-                        aria-label="refresh world"
-                        onClick={this.onRefreshClick}
-                        touch={"true"}
-                        disableFocusRipple={true}
-                        disableRipple={true}
-                        color={"primary"}>
-                        <RefreshRoundedIcon style={{ fontSize: 50 }} />
-                    </IconButton>
-                </div>
-            </ThemeProvider>
+            <ActionButtons
+                playButton={this.playButton}
+                onPlayClick={this.onPlayClick}
+                refreshButton={this.refreshButton}
+                onRefreshClick={this.onRefreshClick} />
             <Settings onChange={this.handleChange} setResolution={this.getCurrentResolution} />
         </div>)
     }
@@ -295,8 +257,8 @@ function initializeWorld() {
         for (let j = 0; j < worlds[i].numForests; j++) {
             let forest = new Forest(Constants.Forest.TreesCount - 1, weather);
             let box = new THREE.Box3().setFromObject(forest.group);
-            let sizeX = box.getSize(new Vector3()).x;
-            let sizeZ = box.getSize(new Vector3()).z;
+            let sizeX = box.getSize(new THREE.Vector3()).x;
+            let sizeZ = box.getSize(new THREE.Vector3()).z;
             const forestPositionX = Utils.randomNumber(-worldWidth / 2 + sizeX / 2, worldWidth / 2 - sizeX / 2);
             const forestPositionZ = Utils.randomNumber(-worldDepth / 2 + sizeZ / 2, worldDepth / 2 - sizeZ / 2);
 
