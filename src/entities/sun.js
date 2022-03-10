@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import * as Colours from "./colours"
-import * as Constants from "./constants";
+import * as Constants from "../worldProperties/constants";
+import * as Colours from "../worldProperties/colours"
 
-export default class Star {
+export default class Sun {
     constructor(positionX, positionY, positionZ, size, lightColour, intensity) {
         const starGeometry = new THREE.BoxBufferGeometry(size, size, size);
         const starMaterial = new THREE.MeshStandardMaterial({color: Colours.Star.Material});
@@ -11,7 +11,7 @@ export default class Star {
         this.mesh.castShadow = false;
         this.mesh.receiveShadow = false;
 
-        // Star will emit light from its position
+        // Sun will emit light from its position
         this.light = new Light(positionX, positionY, positionZ, lightColour, intensity).light;
         this.mesh.position.set(positionX, positionY, positionZ);
     }
@@ -36,8 +36,8 @@ class Light {
         this.light.shadow.camera.bottom = -lightArea;
 
         //Set up shadow properties for the light
-        this.light.shadow.mapSize.width = 8000;
-        this.light.shadow.mapSize.height = 8000;
+        this.light.shadow.mapSize.width = 2048;
+        this.light.shadow.mapSize.height = 2048;
         this.light.shadow.camera.far =
             Math.sqrt(Math.pow(this.light.position.x, 2)
                 + Math.pow(this.light.position.y, 2)

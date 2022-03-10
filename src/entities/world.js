@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import Utils from "./utils";
-import * as Constants from "./constants";
-import * as Colours from "./colours";
+import Utils from "../utils";
+import * as Constants from "../worldProperties/constants";
+import * as Colours from "../worldProperties/colours"
 
 export default class World {
     constructor(weather) {
@@ -14,13 +14,13 @@ export default class World {
             worldColour = Colours.World.SnowyGrass;
         }
         const worldGeometry = new THREE.BoxBufferGeometry(worldWidth, worldHeight, worldDepth);
-        const grassMaterial = new THREE.MeshStandardMaterial({color: worldColour});
+        const grassMaterial = new THREE.MeshPhongMaterial({color: worldColour});
 
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
         this.mesh.receiveShadow = true;
         this.numForests = Utils.randomInteger(Constants.Forest.MinCount, Constants.Forest.MaxCount)
         this.numClouds = Utils.randomInteger(Constants.Cloud.MinCount, Constants.Cloud.MaxCount);
-        this.grove = [];
+        this.forests = [];
         this.clouds = [];
         this.snow = [];
     }
