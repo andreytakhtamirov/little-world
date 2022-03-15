@@ -10,31 +10,16 @@ import World from "./entities/world";
 import * as Constants from "./worldProperties/constants";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Weather from "./worldProperties/weather";
-import Snow from "./entities/cloudParticles/snow";
+import Snow from "./entities/particles/snow";
 import Player from "./entities/player";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
-import Sparkle from "./entities/cloudParticles/sparkle";
-import { createTheme } from "@mui/material";
+import Sparkle from "./entities/particles/sparkle";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
-import Settings from "./components/settings";
-import ActionButtons from "./components/actionButtons";
-
-const theme = createTheme({
-    palette: {
-        primary: {
-            light: '#757ce8', main: '#1c516e', dark: '#002884', contrastText: '#fff',
-        }, secondary: {
-            light: '#ff7961', main: '#f44336', dark: '#ba000d', contrastText: '#000',
-        },
-    },
-    typography: {
-        fontFamily: [
-            'Arial',
-        ].join(','),
-    },
-});
+import Settings from "./components/Settings";
+import ActionButtons from "./components/ActionButtons";
+import Heading from "./components/Heading"
 
 class App extends Component {
     constructor(props) {
@@ -52,20 +37,6 @@ class App extends Component {
         initializeWorld();
         startAnimationLoop();
     }
-
-    titleStyle = {
-        position: "absolute",
-        fontSize: "10px",
-        WebkitTextStroke: 'white',
-        WebkitTextStrokeWidth: '0.2px',
-        fontWeight: 900,
-        transform: "translate(50%, 50%) scale(4)",
-        textAlign: "center",
-        right: "50%",
-        top: '7%',
-        fontFamily: theme.typography.fontFamily,
-        color: theme.palette.primary.main,
-    };
 
     onRefreshClick() {
         purgeWorld(scene);
@@ -92,6 +63,9 @@ class App extends Component {
             case "ultra":
                 resolutionWidth = resolutions[3];
                 break;
+            default:
+                resolutionWidth = resolutions[0];
+                break;
         }
 
         setResolution(resolutionWidth);
@@ -101,7 +75,6 @@ class App extends Component {
         let resolutions = Constants.Page.ResolutionWidths;
         let resolutionWidth = Constants.Page.SetResolutionWidth;
         let resolutionValue = "";
-
         let index = resolutions.indexOf(resolutionWidth);
         switch (index) {
             case 0:
@@ -116,6 +89,9 @@ class App extends Component {
             case 3:
                 resolutionValue = "ultra";
                 break;
+            default:
+                resolutionValue = "medium";
+                break;
         }
 
         return resolutionValue;
@@ -125,11 +101,9 @@ class App extends Component {
         return (<div ref={(mount) => {
         }}>
             <Helmet>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0 user-scalable=yes" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0 user-scalable=no" />
             </Helmet>
-            {/*<p style={this.titleStyle}>*/}
-            {/*    In Your Own Little World!*/}
-            {/*</p>*/}
+            {/* <Heading /> */}
             <ActionButtons
                 playButton={this.playButton}
                 onPlayClick={this.onPlayClick}
@@ -156,7 +130,6 @@ var controls;
 
 function initializeScene() {
     scene = new THREE.Scene();
-
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[1]; // Set default to medium
@@ -192,12 +165,16 @@ function purgeWorld(obj) {
     if (obj.geometry) obj.geometry.dispose();
 
     if (obj.material) {
-        //in case of map, bumpMap, normalMap, envMap ...
         Object.keys(obj.material).forEach(prop => {
             if (!obj.material[prop]) return;
             if (obj.material[prop] !== null && typeof obj.material[prop].dispose === 'function') obj.material[prop].dispose();
         })
         obj.material.dispose();
+    }
+
+    if (player != null) {
+        player.cancelKeyEvents();
+        player = null;
     }
 }
 
@@ -388,6 +365,8 @@ function animate() {
         animateClouds(worlds[i]);
         if (player != null) {
             detectPlayerHits(player, worlds[i]);
+
+            checkClosestTree(player, worlds[i]);
         }
     }
 
@@ -422,28 +401,8 @@ function detectPlayerHits(player, world) {
     if (player == null || !player.isHitting) {
         return;
     }
-    let forests = world.forests;
 
-    let closestTree = null;
-    let closestHitDistance = 0; // closest distance will be the largest one
-
-    for (let i = 0; i < forests.length; i++) {
-        let trees = forests[i].children;
-
-        for (let j = 0; j < trees.length; j++) {
-            let tree = trees[j];
-            if (tree.rotation.z !== Utils.getRadians(0)) {
-                // downed tree
-                continue;
-            }
-
-            let distance = distanceFromPointToCircle(player.hitBox, player.mesh, tree);
-            if (distance > 0 && distance > closestHitDistance) {
-                closestHitDistance = distance;
-                closestTree = tree;
-            }
-        }
-    }
+    let closestTree = findClosestTree(player, world);
 
     if (closestTree != null) {
         player.isHitting = false;
@@ -506,6 +465,46 @@ function detectPlayerHits(player, world) {
         });
         animateColour.start();
     }
+}
+
+function checkClosestTree(player, world) {
+    if (player == null) {
+        return;
+    }
+
+    let closestTree = findClosestTree(player, world);
+
+    if (closestTree != null) {
+        showHitAnimation(closestTree);
+
+        let colour = { colour: 14017487 };
+        let initialTrunkColour = closestTree.material.color.getHex();
+    }
+}
+
+function findClosestTree(player, world) {
+    let forests = world.forests;
+    let closestHitDistance = 0; // closest distance will be the largest one
+    let closestTree = null;
+
+    for (let i = 0; i < forests.length; i++) {
+        let trees = forests[i].children;
+
+        for (let j = 0; j < trees.length; j++) {
+            let tree = trees[j];
+            if (tree.rotation.z !== Utils.getRadians(0)) {
+                // downed tree
+                continue;
+            }
+
+            let distance = distanceFromPointToCircle(player.hitBox, player.mesh, tree);
+            if (distance > 0 && distance > closestHitDistance) {
+                closestHitDistance = distance;
+                closestTree = tree;
+            }
+        }
+    }
+    return closestTree;
 }
 
 function showHitAnimation(tree) {

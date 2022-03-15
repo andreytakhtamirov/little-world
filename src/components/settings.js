@@ -11,53 +11,53 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Radio from '@mui/material/Radio';
 
-const theme = createTheme({
-    palette: {
-        primary: {
-            light: '#757ce8', main: '#1c516e', dark: '#002884', contrastText: '#fff',
-        }, secondary: {
-            light: '#ff7961', main: '#f44336', dark: '#ba000d', contrastText: '#000',
-        },
-    },
-    typography: {
-        fontFamily: [
-            'Arial',
-        ].join(','),
-    },
-});
-
-const style = {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    width: "30%",
-    minWidth: 100,
-    maxWidth: 360,
-    bgcolor: '#fff',
-    border: '2px solid #000',
-    p: 2,
-};
-
-const settingsIconStyle = {
-    position: "absolute",
-    right: 20,
-    top: 20,
-    padding: 0,
-};
-
-const iconFontSize = {
-    fontSize: 40,
-};
-
-const resolutionSettingsStyle = {
-    paddingTop: 10,
-    marginLeft: 10,
-};
-
 export default function Settings({ onChange, setResolution }) {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const theme = createTheme({
+        palette: {
+            primary: {
+                light: '#757ce8', main: '#1c516e', dark: '#002884', contrastText: '#fff',
+            }, secondary: {
+                light: '#ff7961', main: '#f44336', dark: '#ba000d', contrastText: '#000',
+            },
+        },
+        typography: {
+            fontFamily: [
+                'Arial',
+            ].join(','),
+        },
+    });
+
+    const style = {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        width: "30%",
+        minWidth: 100,
+        maxWidth: 360,
+        bgcolor: '#fff',
+        border: '2px solid #000',
+        p: 2,
+    };
+
+    const settingsIconStyle = {
+        position: "absolute",
+        right: 20,
+        top: 20,
+        padding: 0,
+    };
+
+    const iconFontSize = {
+        fontSize: 40,
+    };
+
+    const resolutionSettingsStyle = {
+        paddingTop: 10,
+        marginLeft: 10,
+    };
 
     return (
         <div>

@@ -4,42 +4,34 @@ import IconButton from '@mui/material/IconButton';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import { ThemeProvider, createTheme } from "@mui/material";
 
-const theme = createTheme({
-    palette: {
-        primary: {
-            light: '#757ce8', main: '#1c516e', dark: '#002884', contrastText: '#fff',
-        }, secondary: {
-            light: '#ff7961', main: '#f44336', dark: '#ba000d', contrastText: '#000',
-        },
-    },
-    typography: {
-        fontFamily: [
-            'Arial',
-        ].join(','),
-    },
-});
-
-const style = {
-    position: "absolute",
-    transform: "translate(-50%, -50%)",
-    left: '50%',
-    bottom: '0px',
-    padding: 0,
-};
-
-const playButtonStyle = {
-    position: "absolute",
-    transform: "translate(-50%, -50%) scale(4)",
-    left: '50%',
-    bottom: '10%',
-    padding: 0
-};
-
-const iconFontSize = {
-    fontSize: 60,
-};
-
 export default function ActionButtons({ playButton, onPlayClick, refreshButton, onRefreshClick }) {
+    const theme = createTheme({
+        palette: {
+            primary: {
+                light: '#757ce8', main: '#1c516e', dark: '#002884', contrastText: '#fff',
+            }, secondary: {
+                light: '#ff7961', main: '#f44336', dark: '#ba000d', contrastText: '#000',
+            },
+        },
+        typography: {
+            fontFamily: [
+                'Arial',
+            ].join(','),
+        },
+    });
+
+    const style = {
+        position: "absolute",
+        transform: "translate(-50%, -50%)",
+        left: '50%',
+        bottom: '0px',
+        padding: 0,
+    };
+
+    const iconFontSize = {
+        fontSize: 60,
+    };
+
     return (
         <div>
             <ThemeProvider theme={theme}>
