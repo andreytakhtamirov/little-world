@@ -127,6 +127,7 @@ var worlds;
 var player;
 var light;
 var controls;
+var rotateWorld;
 
 function initializeScene() {
     scene = new THREE.Scene();
@@ -146,8 +147,7 @@ function initializeScene() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.update();
 
-    camera.zoom = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    onWindowResize();
 }
 
 function setResolution(resolutionWidth) {
@@ -180,6 +180,7 @@ function purgeWorld(obj) {
 
 function initializeWorld() {
     animationActive = true;
+    rotateWorld = true;
     worlds = [];
 
     light = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -363,9 +364,11 @@ function animate() {
 
     for (let i = 0; i < worlds.length; i++) {
         animateClouds(worlds[i]);
+        if (rotateWorld) {
+            worlds[i].mesh.rotation.y += Utils.getRadians(0.035);
+        }
         if (player != null) {
             detectPlayerHits(player, worlds[i]);
-
             checkClosestTree(player, worlds[i]);
         }
     }
@@ -375,6 +378,7 @@ function animate() {
 }
 
 function loadPlayer() {
+    rotateWorld = false;
     let world = worlds[0];
     const mtlLoader = new MTLLoader();
     mtlLoader.load("/models/beaver.vox.mtl", mtlParseResult => {
@@ -744,9 +748,17 @@ function startAnimations() {
 }
 
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.zoom = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    setResolution(Constants.Page.SetResolutionWidth);
+    clearTimeout(window.resizedFinished);
+    window.resizedFinished = setTimeout(function () {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        // Scale camera zoom with viewport dimensions
+        if (window.innerWidth > window.innerHeight) {
+            camera.zoom = window.innerHeight / window.innerHeight;
+        } else {
+            camera.zoom = window.innerWidth / window.innerHeight;
+        }
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        setResolution(Constants.Page.SetResolutionWidth);
+    }, 100);
 }
