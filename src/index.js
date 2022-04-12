@@ -15,6 +15,7 @@ import Player from "./entities/player";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import Sparkle from "./entities/particles/sparkle";
+import Pointer from "./entities/particles/pointer";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
 import Settings from "./components/Settings";
@@ -26,10 +27,15 @@ class App extends Component {
         super(props);
         this.refreshButton = React.createRef();
         this.playButton = React.createRef();
+        this.state = {
+            isPlaying: false
+        };
     }
 
     componentDidMount() {
-        this.refreshButton.current.focus();
+        if (this.refreshButton.current != null) {
+            this.refreshButton.current.focus();
+        }
         window.addEventListener('resize', onWindowResize);
         document.addEventListener("pagehide", stopAnimations);
         document.addEventListener("pageshow", startAnimations);
@@ -38,13 +44,15 @@ class App extends Component {
         startAnimationLoop();
     }
 
-    onRefreshClick() {
+    onRefreshClick = () => {
         purgeWorld(scene);
         initializeWorld();
     }
 
-    onPlayClick() {
+    onPlayClick = () => {
+        this.setState({ isPlaying: true });
         loadPlayer();
+        setCamera(true);
     }
 
     handleChange = (event) => {
@@ -104,11 +112,13 @@ class App extends Component {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0 user-scalable=no" />
             </Helmet>
             {/* <Heading /> */}
-            <ActionButtons
-                playButton={this.playButton}
-                onPlayClick={this.onPlayClick}
-                refreshButton={this.refreshButton}
-                onRefreshClick={this.onRefreshClick} />
+            {!this.state.isPlaying &&
+                <ActionButtons
+                    playButton={this.playButton}
+                    onPlayClick={this.onPlayClick}
+                    refreshButton={this.refreshButton}
+                    onRefreshClick={this.onRefreshClick} />
+            }
             <Settings onChange={this.handleChange} setResolution={this.getCurrentResolution} />
         </div>)
     }
@@ -146,7 +156,7 @@ function initializeScene() {
     rootElement.appendChild(renderer.domElement);
     controls = new OrbitControls(camera, renderer.domElement);
     controls.update();
-
+    controls.saveState();
     onWindowResize();
 }
 
@@ -344,6 +354,7 @@ function initializeWorld() {
     // camera.position.set(0, 50 * 1.1, 50 * 0.7);
     light.position.copy(camera.position);
     light.rotation.copy(camera.rotation);
+    controls.saveState();
 }
 
 function startAnimationLoop() {
@@ -369,12 +380,26 @@ function animate() {
         }
         if (player != null) {
             detectPlayerHits(player, worlds[i]);
-            checkClosestTree(player, worlds[i]);
+            //checkClosestTree(player, worlds[i]);
         }
     }
 
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
+}
+
+function setCamera(isPlaying) {
+    rotateWorld = !isPlaying;
+
+    if (isPlaying) {
+        let world = worlds[0];
+        world.mesh.rotation.set(0, 0, 0);
+        controls.reset();
+        controls.enabled = false;
+    } else {
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.update();
+    }
 }
 
 function loadPlayer() {
@@ -386,10 +411,10 @@ function loadPlayer() {
         objLoader.setMaterials(mtlParseResult);
         objLoader.load("/models/beaver.vox.obj", function (obj) {
             obj.scale.set(1.1, 1.1, 1.1);
-            obj.translateY(0.5);
-            obj.translateX(0.5);
-            obj.translateZ(0.5);
-
+            obj.translateX(world.mesh.geometry.parameters.width / 2.5);
+            obj.translateY(world.mesh.geometry.parameters.height / 2);
+            obj.translateZ(world.mesh.geometry.parameters.depth / 2.5);
+            obj.rotation.set(0, Utils.getRadians(180), 0);
             obj.traverse(function (child) {
                 child.castShadow = true;
             });
@@ -434,7 +459,7 @@ function detectPlayerHits(player, world) {
                 closestTree.rotation.z = Utils.getRadians(z);
             });
 
-            let stemHeight = closestTree.geometry.parameters.height / 2;
+            let stemHeight = closestTree.geometry.parameters.height;
             let stemWidth = closestTree.geometry.parameters.width / 2;
             let drop = { yDisplacement: stemHeight };
 
@@ -479,10 +504,10 @@ function checkClosestTree(player, world) {
     let closestTree = findClosestTree(player, world);
 
     if (closestTree != null) {
-        showHitAnimation(closestTree);
-
-        let colour = { colour: 14017487 };
-        let initialTrunkColour = closestTree.material.color.getHex();
+        if (player.closestTree !== closestTree) {
+            player.closestTree = closestTree;
+            showSelectedTree(closestTree);
+        }
     }
 }
 
@@ -541,6 +566,40 @@ function showHitAnimation(tree) {
         up.easing(TWEEN.Easing.Sinusoidal.Out);
         up.start();
         disappear.start()
+    }
+}
+
+function showSelectedTree(tree) {
+    let treePosition = new THREE.Vector3();
+    tree.getWorldPosition(treePosition);
+
+    for (let i = 0; i < 1; i++) {
+        let treeHeight = tree.geometry.parameters.height;
+        let pointer = new Pointer(treePosition, treeHeight).mesh;
+        scene.add(pointer);
+
+        let float = { offsetY: pointer.position.y };
+        let down = new TWEEN.Tween(float).to({
+            offsetY: treeHeight * 2
+        }, 1000).onUpdate(function ({ offsetY }) {
+            pointer.position.y = offsetY;
+        });
+
+        const constScene = scene;
+        let fade = { opacity: (pointer.opacity * 100) };
+        let disappear = new TWEEN.Tween(fade).to({
+            opacity: 0.01
+        }, 100).onUpdate(function ({ opacity }) {
+            pointer.material.opacity -= opacity;
+        }).onComplete(function () {
+            pointer.geometry.dispose();
+            pointer.material.dispose();
+            constScene.remove(pointer);
+        });
+
+        down.easing(TWEEN.Easing.Bounce.Out);
+        down.chain(disappear);
+        down.start();
     }
 }
 
