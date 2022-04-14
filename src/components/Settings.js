@@ -89,6 +89,7 @@ export default function Settings({ onChange, setResolution }) {
                                 defaultValue={setResolution}
                                 name="resolution-group"
                                 onChange={onChange}>
+                                <FormControlLabel value="ultra_low" control={<Radio />} label="Ultra Low" />
                                 <FormControlLabel value="low" control={<Radio />} label="Low" />
                                 <FormControlLabel value="medium" control={<Radio />} label="Medium" />
                                 <FormControlLabel value="high" control={<Radio />} label="High" />

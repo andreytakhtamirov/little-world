@@ -1,6 +1,6 @@
 import Utils from "../utils";
 
-const ResolutionWidths = [720, 1920, 2560, 4000];
+const ResolutionWidths = [480, 720, 1920, 2560, 4000];
 var SetResolutionWidth = 1;
 var ResolutionRatio = 1;
 const WorldSidesCount = 1;
