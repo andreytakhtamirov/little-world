@@ -6,7 +6,7 @@ var ResolutionRatio = 1;
 const WorldSidesCount = 1;
 const WorldRotationSpeed = 0.001;
 const WorldWidth = 50;
-const WorldHeight = 1;
+const WorldHeight = 5;
 const WorldDepth = 50;
 
 const MinCloudsCount = 3;

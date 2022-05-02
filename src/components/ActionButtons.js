@@ -36,7 +36,7 @@ export default function ActionButtons({ playButton, onPlayClick, refreshButton, 
         <div>
             <ThemeProvider theme={theme}>
                 <div style={style}>
-                    {/* <IconButton
+                    <IconButton
                         ref={playButton}
                         aria-label="start game"
                         onClick={onPlayClick}
@@ -45,7 +45,7 @@ export default function ActionButtons({ playButton, onPlayClick, refreshButton, 
                         disableRipple={true}
                         color={"primary"}>
                         <PlayArrowOutlinedIcon style={iconFontSize} />
-                    </IconButton> */}
+                    </IconButton>
                     <IconButton
                         ref={refreshButton}
                         aria-label="refresh world"

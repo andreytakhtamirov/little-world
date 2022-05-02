@@ -14,9 +14,10 @@ export default class Player {
         let cube = null;
         cube = obj;
         this.mesh = cube;
+        this.closestTree = null;
 
-        this.defaultMovement = 2.4;
-        this.minMovement = 1.1;
+        this.defaultMovement = 2;
+        this.minMovement = 0.9;
         this.movement = this.defaultMovement;
         this.isHitting = null;
         this.hitBox = 3.4;
@@ -26,7 +27,7 @@ export default class Player {
         let tweenMove;
         let tweenDown;
 
-        let kJump = 0.5;
+        let kJump = 0.05;
         let kWalk = 1.90;
 
         let durationUp = 1;
@@ -325,7 +326,7 @@ export default class Player {
                     tweenUp.start();
                 }
             }
-        }, 150); //250????
+        }, 100);
     }
 
     set getMovement(newMovement) {

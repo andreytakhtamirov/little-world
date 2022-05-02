@@ -14,12 +14,12 @@ export default class Utils {
 
     static getHeight(mesh) {
         let boundingBox = mesh.geometry.boundingBox;
-        return boundingBox.max.z - boundingBox.min.z;
+        return boundingBox.max.y - boundingBox.min.y;
     }
 
     static getDepth(mesh) {
         let boundingBox = mesh.geometry.boundingBox;
-        return boundingBox.max.y - boundingBox.min.y;
+        return boundingBox.max.z - boundingBox.min.z;
     }
 
     static getRadians(degrees) {
