@@ -14,8 +14,6 @@ import Snow from "./entities/particles/snow";
 import Player from "./entities/player";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
-import Sparkle from "./entities/particles/sparkle";
-import Pointer from "./entities/particles/pointer";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
 import Settings from "./components/Settings";
@@ -36,7 +34,12 @@ class App extends Component {
         if (this.refreshButton.current != null) {
             this.refreshButton.current.focus();
         }
-        window.addEventListener('resize', onWindowResize);
+        window.addEventListener('resize', function () {
+            clearTimeout(window.resizedFinished);
+            window.resizedFinished = setTimeout(function () {
+                onWindowResize();
+            }, 100);
+        });
         document.addEventListener("pagehide", stopAnimations);
         document.addEventListener("pageshow", startAnimations);
         initializeScene();
@@ -257,7 +260,7 @@ function initializeWorld() {
             const forestPositionZ = Utils.randomNumber(-worldDepth / 2 + sizeZ / 2, worldDepth / 2 - sizeZ / 2);
 
             forest.group.position.set(forestPositionX, 0, forestPositionZ);
-            worlds[i].forests.push(forest.group);
+            worlds[i].forests.push(forest);
             worlds[i].mesh.add(forest.group);
         }
         if (weather.conditions === 'snowy') {
@@ -277,9 +280,9 @@ function initializeWorld() {
     for (let i = 0; i < worlds.length; i++) {
         let world = worlds[i];
         for (let j = 0; j < world.forests.length; j++) {
-            let trees = world.forests[j].children;
+            let trees = world.forests[j].trees;
             for (let k = 0; k < trees.length; k++) {
-                let tree = trees[k];
+                let tree = trees[k].mesh;
                 let treeY = tree.position.y;
                 tree.position.set(tree.position.x, tree.position.y + 60, tree.position.z);
                 tree.visible = false;
@@ -382,7 +385,7 @@ function animate() {
     for (let i = 0; i < worlds.length; i++) {
         animateClouds(worlds[i]);
         if (rotateWorld) {
-            worlds[i].mesh.rotation.y += Utils.getRadians(0.035);
+            worlds[i].mesh.rotation.y += Utils.getRadians(0.10);
         }
         if (player != null) {
             detectPlayerHits(player, worlds[i]);
@@ -441,64 +444,7 @@ function detectPlayerHits(player, world) {
 
     if (closestTree != null) {
         player.isHitting = false;
-        showHitAnimation(closestTree);
-
-        let colour = { colour: 14017487 };
-        let initialTrunkColour = closestTree.material.color.getHex();
-
-        // animate tree falling
-        let animateColour = new TWEEN.Tween(colour).to({
-            colour: 13790554
-        }, 500).onUpdate(function ({ colour }) {
-            let children = closestTree.children;
-            for (let i = 0; i < children.length; i++) {
-                children[i].material.color.setHex(colour);
-            }
-            closestTree.material.color.setHex(colour);
-        }).onComplete(function () {
-            closestTree.material.color.setHex(initialTrunkColour);
-            let rotation = { z: closestTree.rotation.z };
-
-            let animateTree = new TWEEN.Tween(rotation).to({
-                z: 90
-            }, 2000).onUpdate(function ({ z }) {
-                closestTree.rotation.z = Utils.getRadians(z);
-            });
-
-            let stemHeight = closestTree.geometry.parameters.height;
-            let stemWidth = closestTree.geometry.parameters.width / 2;
-            let drop = { yDisplacement: stemHeight };
-
-            let treeFall = new TWEEN.Tween(drop).to({
-                yDisplacement: Constants.World.Height / 2 + stemWidth
-            }, 2000).onUpdate(function ({ yDisplacement }) {
-                closestTree.position.set(closestTree.position.x, yDisplacement, closestTree.position.z);
-            });
-
-            let children = closestTree.children;
-            let fade = { opacity: (closestTree.children[0].opacity * 100) };
-
-            let leavesDisappear = new TWEEN.Tween(fade).to({
-                opacity: 0.01
-            }, 5000).onUpdate(function ({ opacity }) {
-                for (let i = 0; i < children.length; i++) {
-                    children[i].material.opacity -= opacity;
-                }
-            }).onComplete(function () {
-                for (let i = 0; i < children.length; i++) {
-                    children[i].geometry.dispose();
-                    children[i].material.dispose();
-                    closestTree.remove(children[i]);
-                }
-            });
-
-            animateTree.easing(TWEEN.Easing.Bounce.Out);
-            animateTree.start();
-            treeFall.easing(TWEEN.Easing.Bounce.Out);
-            treeFall.chain(leavesDisappear);
-            treeFall.start();
-        });
-        animateColour.start();
+        closestTree.showHitAnimation(scene);
     }
 }
 
@@ -512,7 +458,7 @@ function checkClosestTree(player, world) {
     if (closestTree != null) {
         if (player.closestTree !== closestTree) {
             player.closestTree = closestTree;
-            showSelectedTree(closestTree);
+            closestTree.showSelectedTree(scene);
         }
     }
 }
@@ -523,16 +469,16 @@ function findClosestTree(player, world) {
     let closestTree = null;
 
     for (let i = 0; i < forests.length; i++) {
-        let trees = forests[i].children;
+        let trees = forests[i].trees;
 
         for (let j = 0; j < trees.length; j++) {
             let tree = trees[j];
-            if (tree.rotation.z !== Utils.getRadians(0)) {
+            if (tree.mesh.rotation.z !== Utils.getRadians(0)) {
                 // downed tree
                 continue;
             }
 
-            let distance = distanceFromPointToCircle(player.hitBox, player.mesh, tree);
+            let distance = distanceFromPointToCircle(player.hitBox, player.mesh, tree.mesh);
             if (distance > 0 && distance > closestHitDistance) {
                 closestHitDistance = distance;
                 closestTree = tree;
@@ -540,73 +486,6 @@ function findClosestTree(player, world) {
         }
     }
     return closestTree;
-}
-
-function showHitAnimation(tree) {
-    let treePosition = new THREE.Vector3();
-    tree.getWorldPosition(treePosition);
-
-    for (let i = 0; i < 3; i++) {
-        let sparkle = new Sparkle(treePosition, tree.geometry.parameters.height).mesh;
-        scene.add(sparkle);
-
-        let float = { offsetY: sparkle.position.y };
-        let up = new TWEEN.Tween(float).to({
-            offsetY: 15
-        }, 4000).onUpdate(function ({ offsetY }) {
-            sparkle.position.y = offsetY;
-        });
-
-        const constScene = scene;
-        let fade = { opacity: (sparkle.opacity * 100) };
-        let disappear = new TWEEN.Tween(fade).to({
-            opacity: 0.01
-        }, 1500).onUpdate(function ({ opacity }) {
-            sparkle.material.opacity -= opacity;
-        }).onComplete(function () {
-            sparkle.geometry.dispose();
-            sparkle.material.dispose();
-            constScene.remove(sparkle);
-        });
-
-        up.easing(TWEEN.Easing.Sinusoidal.Out);
-        up.start();
-        disappear.start()
-    }
-}
-
-function showSelectedTree(tree) {
-    let treePosition = new THREE.Vector3();
-    tree.getWorldPosition(treePosition);
-
-    for (let i = 0; i < 1; i++) {
-        let treeHeight = tree.geometry.parameters.height;
-        let pointer = new Pointer(treePosition, treeHeight).mesh;
-        scene.add(pointer);
-
-        let float = { offsetY: pointer.position.y };
-        let down = new TWEEN.Tween(float).to({
-            offsetY: treeHeight * 2
-        }, 1000).onUpdate(function ({ offsetY }) {
-            pointer.position.y = offsetY;
-        });
-
-        const constScene = scene;
-        let fade = { opacity: (pointer.opacity * 100) };
-        let disappear = new TWEEN.Tween(fade).to({
-            opacity: 0.01
-        }, 100).onUpdate(function ({ opacity }) {
-            pointer.material.opacity -= opacity;
-        }).onComplete(function () {
-            pointer.geometry.dispose();
-            pointer.material.dispose();
-            constScene.remove(pointer);
-        });
-
-        down.easing(TWEEN.Easing.Bounce.Out);
-        down.chain(disappear);
-        down.start();
-    }
 }
 
 function animateClouds(parentWorld) {
@@ -710,10 +589,10 @@ function animateSnow(parentWorld, parentCloud, snow) {
         }
 
         for (let j = 0; j < forests.length; j++) {
-            let trees = forests[j].children;
+            let trees = forests[j].trees;
 
             for (let k = 0; k < trees.length; k++) {
-                let treeLeaves = trees[k].children;
+                let treeLeaves = trees[k].mesh.children;
 
                 for (let m = 0; m < treeLeaves.length; m++) {
                     let treeLeaf = treeLeaves[m];
@@ -813,17 +692,14 @@ function startAnimations() {
 }
 
 function onWindowResize() {
-    clearTimeout(window.resizedFinished);
-    window.resizedFinished = setTimeout(function () {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        // Scale camera zoom with viewport dimensions
-        if (window.innerWidth > window.innerHeight) {
-            camera.zoom = window.innerHeight / window.innerHeight;
-        } else {
-            camera.zoom = window.innerWidth / window.innerHeight;
-        }
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        setResolution(Constants.Page.SetResolutionWidth);
-    }, 100);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    // Scale camera zoom with viewport dimensions
+    if (window.innerWidth > window.innerHeight) {
+        camera.zoom = window.innerHeight / window.innerHeight;
+    } else {
+        camera.zoom = window.innerWidth / window.innerHeight;
+    }
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    setResolution(Constants.Page.SetResolutionWidth);
 }
