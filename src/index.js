@@ -62,17 +62,20 @@ class App extends Component {
         let resolutionWidth;
         let resolutions = Constants.Page.ResolutionWidths;
         switch (event.target.value) {
-            case "low":
+            case "ultra_low":
                 resolutionWidth = resolutions[0];
                 break;
-            case "medium":
+            case "low":
                 resolutionWidth = resolutions[1];
                 break;
-            case "high":
+            case "medium":
                 resolutionWidth = resolutions[2];
                 break;
-            case "ultra":
+            case "high":
                 resolutionWidth = resolutions[3];
+                break;
+            case "ultra":
+                resolutionWidth = resolutions[4];
                 break;
             default:
                 resolutionWidth = resolutions[0];
@@ -89,15 +92,18 @@ class App extends Component {
         let index = resolutions.indexOf(resolutionWidth);
         switch (index) {
             case 0:
-                resolutionValue = "low";
+                resolutionValue = "ultra_low";
                 break;
             case 1:
-                resolutionValue = "medium";
+                resolutionValue = "low";
                 break;
             case 2:
-                resolutionValue = "high";
+                resolutionValue = "medium";
                 break;
             case 3:
+                resolutionValue = "high";
+                break;
+            case 4:
                 resolutionValue = "ultra";
                 break;
             default:
@@ -146,7 +152,7 @@ function initializeScene() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[1]; // Set default to medium
+    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[2]; // Set default to medium
     setResolution(Constants.Page.SetResolutionWidth);
 
     // Show stats (framerate)
@@ -397,10 +403,10 @@ function setCamera(isPlaying) {
     if (isPlaying) {
         let world = worlds[0];
         world.mesh.rotation.set(0, 0, 0);
-        controls.reset();
         controls.enabled = false;
+        controls.reset();
     } else {
-        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enabled = true;
         controls.update();
     }
 }
