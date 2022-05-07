@@ -326,7 +326,7 @@ export default class Player {
                     tweenUp.start();
                 }
             }
-        }, 100);
+        }, 50);
     }
 
     set getMovement(newMovement) {

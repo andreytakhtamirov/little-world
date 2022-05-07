@@ -156,8 +156,8 @@ function initializeScene() {
     setResolution(Constants.Page.SetResolutionWidth);
 
     // Show stats (framerate)
-    stats = new Stats();
-    document.body.appendChild(stats.dom);
+    // stats = new Stats();
+    // document.body.appendChild(stats.dom);
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
@@ -403,8 +403,8 @@ function setCamera(isPlaying) {
     if (isPlaying) {
         let world = worlds[0];
         world.mesh.rotation.set(0, 0, 0);
+        controls.enabled = false;
         controls.reset();
-        // controls.enabled = false;
     } else {
         controls.enabled = true;
         controls.update();
