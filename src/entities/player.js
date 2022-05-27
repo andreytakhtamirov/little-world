@@ -5,15 +5,7 @@ import * as Constants from "../worldProperties/constants";
 
 export default class Player {
     constructor(obj, camera) {
-        if (obj == null) {
-            let material = new THREE.MeshStandardMaterial({ color: new THREE.Color("rgb(108,80,80)") });
-            let geometry = new THREE.BoxGeometry(2, 2, 2);
-            this.mesh = new THREE.Mesh(geometry, material);
-        }
-
-        let cube = null;
-        cube = obj;
-        this.mesh = cube;
+        this.mesh = obj;
         this.closestTree = null;
 
         this.defaultMovement = 2;
@@ -35,26 +27,18 @@ export default class Player {
         this.durationMove = 280;
         this.durationDown = 1;
 
-        this.jumpHeight = this.getMovement * this.kJump;
+        this.jumpHeight = this.movement * this.kJump;
 
         let player = this;
         KeyboardController({
-            // D
+            // W - 87, A - 65, S - 83, D - 68
             68: function() {
                 player.moveRight(camera);
             }
         }, 100);
     }
 
-    set getMovement(newMovement) {
-        this.movement = newMovement;
-    }
-
-    get getMovement() {
-        return this.movement;
-    }
-
-    get getPosition() {
+    get position() {
         return this.mesh.position;
     }
 
@@ -64,55 +48,52 @@ export default class Player {
     }
 
     moveRight(camera) {
-        let player = this;
-        let playerMesh = this.mesh;
+        let mesh = this.mesh;
 
-        if (player != null && player.getPosition.x + (player.defaultMovement * this.kWalk) > Constants.World.Width / 2 - 1) {
-            if (player.getPosition.x + (player.minMovement * this.kWalk) < Constants.World.Width / 2) {
-                player.getMovement = player.minMovement;
+        if (this.position.x + (this.defaultMovement * this.kWalk) > Constants.World.Width / 2 - 1) {
+            if (this.position.x + (this.minMovement * this.kWalk) < Constants.World.Width / 2) {
+                this.movement = this.minMovement;
             } else {
-                player.getMovement = 0;
+                this.movement = 0;
             }
-        } else if (player != null) {
-            player.getMovement = player.defaultMovement;
         }
         if (!this.moveLock) {
             this.moveLock = 1;
-            let position = { x: playerMesh.position.x, y: playerMesh.position.y };
+            let position = { x: mesh.position.x, y: mesh.position.y };
             this.tweenUp = new TWEEN.Tween(position).to({
-                x: playerMesh.position.x,
-                y: playerMesh.position.y + this.jumpHeight
+                x: mesh.position.x,
+                y: mesh.position.y + this.jumpHeight
             }, this.durationUp).onUpdate(function ({ x, y }) {
-                playerMesh.position.x = x;
-                playerMesh.position.y = y;
+                mesh.position.x = x;
+                mesh.position.y = y;
             });
-            this.tweenTurn = new TWEEN.Tween({ rotation: playerMesh.rotation.y }).to({
+            this.tweenTurn = new TWEEN.Tween({ rotation: mesh.rotation.y }).to({
                 rotation: Utils.getRadians(90)
             }, this.durationTurn).onUpdate(function ({ rotation }) {
-                playerMesh.rotation.set(0, rotation, 0);
+                mesh.rotation.set(0, rotation, 0);
             });
 
-            let move = player.getMovement * this.kWalk;
-            this.tweenMove = new TWEEN.Tween({ x: playerMesh.position.x, y: playerMesh.position.y + this.jumpHeight }).to({
+            let move = this.movement * this.kWalk;
+            this.tweenMove = new TWEEN.Tween({ x: mesh.position.x, y: mesh.position.y + this.jumpHeight}).to({
                 x: position.x + move,
                 y: position.y
             }, this.durationMove).onUpdate(function ({ x, y }) {
-                camera.position.x += Math.abs(playerMesh.position.x - x);
-                camera.rotation.z -= Utils.getRadians(Math.abs(playerMesh.position.x - x) * 0.05);
-                playerMesh.position.x = x;
-                playerMesh.position.y = y;
+                camera.position.x += Math.abs(mesh.position.x - x);
+                camera.rotation.z -= Utils.getRadians(Math.abs(mesh.position.x - x) * 0.05);
+                mesh.position.x = x;
+                mesh.position.y = y;
             });
-            this.tweenDown = new TWEEN.Tween({ x: playerMesh.position.x + move, y: playerMesh.position.y }).to({
+            this.tweenDown = new TWEEN.Tween({ x: mesh.position.x + move, y: mesh.position.y }).to({
                 x: position.x + move,
                 y: position.y
             }, this.durationDown).onUpdate(function ({ x, y }) {
-                playerMesh.position.x = x;
-                playerMesh.position.y = y;
+                mesh.position.x = x;
+                mesh.position.y = y;
             }).onComplete(function () {
                 this.moveLock = 0;
             });
 
-            if (playerMesh.rotation.y === Utils.getRadians(90)) {
+            if (mesh.rotation.y === Utils.getRadians(90)) {
                 this.tweenTurn.duration(0);
             }
             this.tweenUp.chain(this.tweenTurn);

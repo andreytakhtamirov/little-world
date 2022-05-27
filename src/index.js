@@ -414,7 +414,7 @@ function loadPlayer() {
         objLoader.setMaterials(mtlParseResult);
         objLoader.load("/models/beaver.vox.obj", function (obj) {
             obj.scale.set(1.1, 1.1, 1.1);
-            obj.translateX(world.mesh.geometry.parameters.width / 2.5);
+            obj.translateX(0);
             obj.translateY(world.mesh.geometry.parameters.height / 2);
             obj.translateZ(world.mesh.geometry.parameters.depth / 2.5);
             obj.rotation.set(0, Utils.getRadians(180), 0);
