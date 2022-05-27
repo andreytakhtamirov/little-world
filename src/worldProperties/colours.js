@@ -46,6 +46,12 @@ export class Cloud {
     }
 }
 
+export class River {
+    static get Material() {
+        return "rgb(107,201,255)";
+    }
+}
+
 export class Weather {
     static get Sunny() {
         return [

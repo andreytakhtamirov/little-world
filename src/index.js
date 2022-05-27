@@ -6,6 +6,7 @@ import Sun from "./entities/sun"
 import Forest from "./entities/forest";
 import Utils from "./utils";
 import Cloud from "./entities/cloud";
+import River from "./entities/river";
 import World from "./entities/world";
 import * as Constants from "./worldProperties/constants";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -152,7 +153,7 @@ function initializeScene() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[2]; // Set default to medium
+    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[0]; // Set default to medium
     setResolution(Constants.Page.SetResolutionWidth);
 
     // Show stats (framerate)
@@ -273,6 +274,10 @@ function initializeWorld() {
             worlds[i].mesh.add(cloud.group);
         }
     }
+
+    // Add river
+    let river = new River();
+    worlds[0].mesh.add(river.mesh);
 
     worlds[0].mesh.rotation.set(0, Utils.getRadians(-5), 0);
 
