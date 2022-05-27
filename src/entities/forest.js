@@ -7,13 +7,13 @@ import Sparkle from "./particles/sparkle";
 import Pointer from "./particles/pointer";
 
 export default class Forest {
-    constructor(treesCount, weather) {
+    constructor(world, treesCount, weather) {
         // First set up a center Tree for the forest. Other Tree meshes will be added to this mesh
         this.group = new THREE.Group();
         this.trees = [];
 
         for (let i = 0; i < treesCount; i++) {
-            let tree = new Tree(weather);
+            let tree = new Tree(world, treesCount, weather);
             this.trees.push(tree);
             this.group.add(tree.mesh);
         }
@@ -21,7 +21,7 @@ export default class Forest {
 }
 
 class Tree {
-    constructor(weather) {
+    constructor(world, treesCount, weather) {
         // How many leaves are in each tree
         const leavesInTree = Utils.randomInteger(2, 3);
 
@@ -36,10 +36,10 @@ class Tree {
 
         this.mesh = new THREE.Mesh(stemGeometry, stemMaterial);
 
-        let treeDistance = Constants.Forest.TreesCount * 0.8;
+        let treeDistance = treesCount * 0.8;
         // Tree location
         const treePositionX = Utils.randomNumber(-treeDistance + stemWidth, treeDistance - stemWidth);
-        const treePositionY = Constants.World.Height / 2 + this.mesh.geometry.parameters.height / 2;
+        const treePositionY = world.mesh.geometry.parameters.height / 2 + this.mesh.geometry.parameters.height / 2;
         const treePositionZ = Utils.randomNumber(-treeDistance + stemDepth, treeDistance - stemDepth);
 
         this.mesh.position.set(treePositionX, treePositionY, treePositionZ);

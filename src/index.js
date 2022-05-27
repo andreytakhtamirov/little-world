@@ -253,7 +253,7 @@ function initializeWorld() {
     // Set up forests, clouds, and rain/snow for each world plane
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         for (let j = 0; j < worlds[i].numForests; j++) {
-            let forest = new Forest(Constants.Forest.TreesCount - 1, weather);
+            let forest = new Forest(worlds[i], Constants.Forest.TreesCount - 1, weather);
             let box = new THREE.Box3().setFromObject(forest.group);
             let sizeX = box.getSize(new THREE.Vector3()).x;
             let sizeZ = box.getSize(new THREE.Vector3()).z;
