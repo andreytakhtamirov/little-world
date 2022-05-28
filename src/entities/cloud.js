@@ -29,6 +29,7 @@ export default class Cloud {
         this.movementCounter = 0;
 
         this.snow = [];
+        this.rain = [];
 
         this.resetMovement();
     }

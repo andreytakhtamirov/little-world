@@ -48,7 +48,7 @@ export class Cloud {
 
 export class River {
     static get Material() {
-        return "rgb(107,201,255)";
+        return "#195d87";
     }
 }
 
@@ -65,9 +65,19 @@ export class Weather {
 
     static get Cloudy() {
         return [
-            "rgb(173,181,189)",
+            "#6b7076",
             "rgb(182,135,135)",
             "rgb(200,178,236)",
+            "rgb(65,65,65)",
+            "rgb(108,117,125)"
+        ];
+    }
+
+    static get Rainy() {
+        return [
+            "#95989b",
+            "#383636",
+            "#533387",
             "rgb(65,65,65)",
             "rgb(108,117,125)"
         ];
