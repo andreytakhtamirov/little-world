@@ -1,26 +1,25 @@
 import * as THREE from "three";
-import * as Colours from "../../worldProperties/colours";
+import Utils from "../../utils";
+import * as Colours from "../../properties/colours";
 
-export default class Rain {
-    constructor() {
-        // TODO Add multiple raindrop creation
-        this.mesh = new RainDrop().mesh;
-    }
-}
+export default class RainDrop {
+    constructor(parentMesh) {
+        const width = 0.1;
+        const height = 0.3;
+        const depth = width;
 
-class RainDrop {
-    constructor() {
-        const rainDropWidthHeightDepth = 1;
-        const positionX = Math.random() * (8 + 4) - 4;
-        const positionY = 0;
-        const positionZ = Math.random() * (8 + 4) - 4;
+        let material = new THREE.MeshStandardMaterial({color: Colours.Rain.Material});
+        let geometry = new THREE.BoxBufferGeometry(width, height, depth);
+        let parentWidth = parentMesh.geometry.parameters.width;
+        let parentDepth = parentMesh.geometry.parameters.depth;
+        const positionX = Utils.randomNumber(-parentWidth / 2, parentWidth / 2);
+        const positionZ = Utils.randomNumber(-parentDepth / 2, parentDepth / 2);
 
-        const rainDropMaterial = new THREE.MeshStandardMaterial({color: Colours.Rain.Material});
-        const rainDropGeometry = new THREE.BoxBufferGeometry(rainDropWidthHeightDepth, rainDropWidthHeightDepth, rainDropWidthHeightDepth);
-        const rainDropLine = new THREE.LineSegments(new THREE.EdgesGeometry(rainDropGeometry), new THREE.LineBasicMaterial({color: Colours.Rain.Outline}));
-
-        this.mesh = new THREE.Mesh(rainDropGeometry, rainDropMaterial);
-        this.mesh.add(rainDropLine);
-        this.mesh.position.set(positionX, positionY, positionZ);
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.position.set(positionX, 0, positionZ);
+        this.mesh.castShadow = true;
+        this.fallSpeed = 0.4;
+        this.timeOut = Utils.randomNumber(0, 10);
+        this.hasCollided = false;
     }
 }

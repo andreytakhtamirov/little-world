@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Utils from "../utils";
-import * as Constants from "../worldProperties/constants";
-import * as Colours from "../worldProperties/colours";
+import * as Constants from "../properties/constants";
+import * as Colours from "../properties/colours";
 
 export default class Cloud {
     constructor() {
@@ -29,6 +29,7 @@ export default class Cloud {
         this.movementCounter = 0;
 
         this.snow = [];
+        this.rain = [];
 
         this.resetMovement();
     }

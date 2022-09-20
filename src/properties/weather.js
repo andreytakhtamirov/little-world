@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import * as Colours from "../worldProperties/colours"
+import * as Colours from "../properties/colours"
 
 export default class Weather {
     constructor(conditions) {
@@ -28,6 +28,15 @@ export default class Weather {
                 this.conditions = 'cloudy';
                 break;
             case 3:
+                colours = Colours.Weather.Rainy;
+                this.sceneBackground = new THREE.Color(colours[0]);
+                this.sunColour = new THREE.Color(colours[1]);
+                this.ambientLights.push(new THREE.AmbientLight(colours[2], 0.3));
+                this.ambientLights.push(new THREE.AmbientLight(colours[3], 0.3));
+                this.ambientLights.push(new THREE.AmbientLight(colours[4], 0.7));
+                this.conditions = 'rainy';
+                break;
+            case 4:
                 colours = Colours.Weather.Clear;
                 this.sceneBackground = new THREE.Color(colours[0]);
                 this.sunColour = new THREE.Color(colours[1]);
@@ -36,7 +45,7 @@ export default class Weather {
                 this.ambientLights.push(new THREE.AmbientLight(colours[4], 0.7));
                 this.conditions = 'clear';
                 break;
-            case 4:
+            case 5:
                 colours = Colours.Weather.Snowy;
                 this.sceneBackground = new THREE.Color(colours[0]);
                 this.sunColour = new THREE.Color(colours[1]);
@@ -45,7 +54,7 @@ export default class Weather {
                 this.ambientLights.push(new THREE.AmbientLight(colours[4], 0.1));
                 this.conditions = 'snowy';
                 break;
-            case 5:
+            case 6:
                 colours = Colours.Weather.Snowy_clear;
                 this.sceneBackground = new THREE.Color(colours[0]);
                 this.sunColour = new THREE.Color(colours[1]);
