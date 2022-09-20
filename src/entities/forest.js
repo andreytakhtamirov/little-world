@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import * as TWEEN from "@tweenjs/tween.js";
 import Utils from "../utils";
-import * as Constants from "../worldProperties/constants";
-import * as Colours from "../worldProperties/colours"
+import * as Constants from "../properties/constants";
+import * as Colours from "../properties/colours"
 import Sparkle from "./particles/sparkle";
 import Pointer from "./particles/pointer";
 

@@ -8,9 +8,9 @@ import Utils from "./utils";
 import Cloud from "./entities/cloud";
 import River from "./entities/river";
 import World from "./entities/world";
-import * as Constants from "./worldProperties/constants";
+import * as Constants from "./properties/constants";
 import Stats from "three/examples/jsm/libs/stats.module";
-import Weather from "./worldProperties/weather";
+import Weather from "./properties/weather";
 import Snow from "./entities/particles/snow";
 import Rain from "./entities/particles/rain";
 import Player from "./entities/player";
@@ -184,7 +184,7 @@ function purgeWorld(obj) {
         obj.remove(obj.children[0]);
     }
     if (obj.geometry) {
-        obj.geometry.dispose()
+        obj.geometry.dispose();
     };
 
     if (obj.material) {
@@ -286,13 +286,17 @@ function initializeWorld() {
 
     // Add logic to remove trees that collide with the river
     // for (let i = 0; i < world.forests.length; i++) {
-    //     let trees = world.forests[i].trees;
+    //     let trees = world.forests[i].children;
+    //     console.log("forest group size: " + trees.length);
     //     for (let j = 0; j < trees.length; j++) {
     //         let tree = trees[j];
-    //         if (detectCollision(world.river.mesh, tree.mesh)) {
-    //             tree.showHitAnimation(scene);
-    //             tree.mesh.geometry.dispose();
-    //             tree.mesh.material.dispose();
+    //         if (tree == null || world.river.mesh == null) {
+    //             console.log("null mesh");
+    //         }
+    //         if (detectCollision(tree, world.river.mesh)) {
+    //             tree.geometry.dispose();
+    //             tree.material.dispose();
+    //             world.forests[i].group.remove(tree);
     //             trees.splice(j, 1);
     //         }
     //     }
@@ -332,14 +336,16 @@ function animate() {
     controls.update();
 
     for (let i = 0; i < worlds.length; i++) {
-        animateClouds(worlds[i]);
+        let world = worlds[i];
+        animateClouds(world);
         if (rotateWorld) {
-            worlds[i].mesh.rotation.y += Utils.getRadians(0.10);
+            world.mesh.rotation.y += Utils.getRadians(0.10);
         }
         if (player != null) {
-            detectPlayerHits(player, worlds[i]);
+            detectPlayerHits(player, world);
             //checkClosestTree(player, worlds[i]);
         }
+        world.river.animate();
     }
 
     renderer.render(scene, camera);

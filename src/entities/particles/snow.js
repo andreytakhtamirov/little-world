@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import Utils from "../../utils";
-import * as Colours from "../../worldProperties/colours"
+import * as Colours from "../../properties/colours"
 
 export default class Snow {
     constructor(parentMesh) {

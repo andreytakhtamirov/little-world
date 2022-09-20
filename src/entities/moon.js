@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import * as Colours from "../worldProperties/colours"
+import * as Colours from "../properties/colours"
 
 export default class Moon {
     constructor(positionX, positionY, positionZ, size) {

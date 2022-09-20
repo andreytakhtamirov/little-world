@@ -50,6 +50,9 @@ export class River {
     static get Material() {
         return "#195d87";
     }
+    static get Stream() {
+        return "rgb(255,255,255)";
+    }
 }
 
 export class Weather {

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Utils from "../utils";
 import * as TWEEN from "@tweenjs/tween.js";
-import * as Constants from "../worldProperties/constants";
+import * as Constants from "../properties/constants";
 
 export default class Player {
     constructor(obj, camera) {

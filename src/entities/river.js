@@ -1,16 +1,19 @@
 import * as THREE from "three";
+import * as TWEEN from "@tweenjs/tween.js";
 import Utils from "../utils";
-import * as Constants from "../worldProperties/constants";
-import * as Colours from "../worldProperties/colours";
+import * as Constants from "../properties/constants";
+import * as Colours from "../properties/colours";
+import Stream from "./particles/stream";
+import BigStream from "./particles/bigStream";
 
 export default class River {
     constructor() {
-        const worldWidth = Constants.World.Width;
+        const worldLength = Constants.World.Width;
         const worldHeight = Constants.World.Height;
-        const width = Utils.randomNumber(8, 10);
+        const width = Utils.randomNumber(worldLength * 0.17, worldLength * 0.22);
 
         let rotation = 0;
-        let position = Utils.randomNumber(-worldWidth / 2 + width / 2 - 0.5, worldWidth / 2 - width / 2 + 0.5);
+        let position = Utils.randomNumber(-worldLength / 2 + width / 2 - 0.5, worldLength / 2 - width / 2 + 0.5);
 
         let posX = 0;
         let posY = 0;
@@ -29,7 +32,7 @@ export default class River {
         }
 
         const material = new THREE.MeshStandardMaterial({ color: Colours.River.Material });
-        const geometry = new THREE.BoxBufferGeometry(worldWidth + 1, worldHeight + 1, width);
+        const geometry = new THREE.BoxBufferGeometry(worldLength + 1, worldHeight + 1, width);
 
         this.mesh = new THREE.Mesh(geometry, material);
 
@@ -41,6 +44,36 @@ export default class River {
     }
 
     animate() {
+        let riverMesh = this.mesh;
+        // TODO redo with random numbers
+        if (riverMesh.children.length < 20) {
+            let stream = new Stream(riverMesh);
+            riverMesh.add(stream.mesh);
+        } else if (riverMesh.children.length < 40) {
+            let bigStream = new BigStream(riverMesh);
+            riverMesh.add(bigStream.mesh);
+        }
 
+        for (let i = 0; i < riverMesh.children.length; i++) {
+            let mesh = riverMesh.children[i];
+
+            let streamPosition = new THREE.Vector3();
+            mesh.getWorldPosition(streamPosition);
+
+            let position = { x: mesh.position.x };
+
+            let animateFlow = new TWEEN.Tween(position).to({
+                x: mesh.position.x + 10
+            }, 1000).onUpdate(function ({ x }) {
+            
+                if (mesh.position.x >= riverMesh.geometry.parameters.width/2) {
+                    riverMesh.remove(mesh);
+                    return;
+                }
+                mesh.position.x = x;
+            });
+            animateFlow.easing(TWEEN.Easing.Linear.None);
+            animateFlow.start();
+        }
     }
 }

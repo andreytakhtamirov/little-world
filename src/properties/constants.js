@@ -21,7 +21,7 @@ const WindSpeedY = 0;
 const WindSpeedZ = Utils.randomNumber(-CloudMovementSpeed, CloudMovementSpeed);
 
 const MinNumOfForests = 3;
-const MaxNumOfForests = 10;
+const MaxNumOfForests = 5;
 const TreesPerForest = 10;
 const LeafMovementSpeed = 0.02;
 
