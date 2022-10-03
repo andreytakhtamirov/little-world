@@ -358,8 +358,8 @@ function setCamera(isPlaying) {
     if (isPlaying) {
         let world = worlds[0];
         world.mesh.rotation.set(0, 0, 0);
-        controls.enabled = false;
-        controls.reset();
+        // controls.enabled = false;
+        // controls.reset();
     } else {
         controls.enabled = true;
         controls.update();
@@ -370,11 +370,11 @@ function loadPlayer() {
     rotateWorld = false;
     let world = worlds[0];
     const mtlLoader = new MTLLoader();
-    mtlLoader.load("/models/beaver.vox.mtl", mtlParseResult => {
+    mtlLoader.load("/models/bunny2.vox.mtl", mtlParseResult => {
         const objLoader = new OBJLoader();
         objLoader.setMaterials(mtlParseResult);
-        objLoader.load("/models/beaver.vox.obj", function (obj) {
-            obj.scale.set(1.1, 1.1, 1.1);
+        objLoader.load("/models/bunny2.vox.obj", function (obj) {
+            obj.scale.set(0.6, 0.6, 0.6);
             obj.translateX(world.mesh.geometry.parameters.width / 2.5);
             obj.translateY(world.mesh.geometry.parameters.height / 2);
             obj.translateZ(world.mesh.geometry.parameters.depth / 2.5);

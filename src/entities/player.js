@@ -27,8 +27,8 @@ export default class Player {
         let tweenMove;
         let tweenDown;
 
-        let kJump = 0.05;
-        let kWalk = 1.90;
+        let kJump = 0.5;
+        let kWalk = 1.0;
 
         let durationUp = 1;
         let durationTurn = 40;
