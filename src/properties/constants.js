@@ -1,5 +1,6 @@
 import Utils from "../utils";
 
+const ResolutionStorageKey = 'Resolution';
 const ResolutionWidths = [480, 720, 1920, 2560, 4000];
 var SetResolutionWidth = 1;
 var ResolutionRatio = 1;
@@ -26,6 +27,10 @@ const TreesPerForest = 10;
 const LeafMovementSpeed = 0.02;
 
 export class Page {
+    static get ResolutionStorageKey() {
+        return ResolutionStorageKey;
+    }
+
     static get ResolutionRatio() {
         return ResolutionRatio;
     }

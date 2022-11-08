@@ -9,7 +9,7 @@ export default class Snow {
         const depth = width;
 
         let snowMaterial = new THREE.MeshStandardMaterial({color: Colours.Snow.Material});
-        let snowGeometry = new THREE.BoxBufferGeometry(width, height, depth);
+        let snowGeometry = new THREE.BoxGeometry(width, height, depth);
         let parentWidth = parentMesh.geometry.parameters.width;
         let parentDepth = parentMesh.geometry.parameters.depth;
         const positionX = Utils.randomNumber(-parentWidth / 2, parentWidth / 2);

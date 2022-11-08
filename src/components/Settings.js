@@ -10,8 +10,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Radio from '@mui/material/Radio';
+import * as Constants from '../properties/constants';
 
-export default function Settings({ onChange, setResolution }) {
+export default function Settings({ onChange }) {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -59,6 +60,36 @@ export default function Settings({ onChange, setResolution }) {
         marginLeft: 10,
     };
 
+    function getCurrentResolution() {
+        let resolutions = Constants.Page.ResolutionWidths;
+        let resolutionWidth = Constants.Page.SetResolutionWidth;
+        let resolutionValue = "";
+        let index = resolutions.indexOf(resolutionWidth);
+
+        switch (index) {
+            case 0:
+                resolutionValue = "ultra_low";
+                break;
+            case 1:
+                resolutionValue = "low";
+                break;
+            case 2:
+                resolutionValue = "medium";
+                break;
+            case 3:
+                resolutionValue = "high";
+                break;
+            case 4:
+                resolutionValue = "ultra";
+                break;
+            default:
+                resolutionValue = "medium";
+                break;
+        }
+
+        return resolutionValue;
+    }
+
     return (
         <div>
             <ThemeProvider theme={theme}>
@@ -84,9 +115,8 @@ export default function Settings({ onChange, setResolution }) {
                         <FormControl style={resolutionSettingsStyle}>
                             <FormLabel id="resolution-group-label">Resolution</FormLabel>
                             <RadioGroup
-                                row
                                 aria-labelledby="resolution-group-label"
-                                defaultValue={setResolution}
+                                defaultValue={getCurrentResolution()}
                                 name="resolution-group"
                                 onChange={onChange}>
                                 <FormControlLabel value="ultra_low" control={<Radio />} label="Ultra Low" />

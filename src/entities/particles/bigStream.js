@@ -9,7 +9,7 @@ export default class BigStream {
         const depth = height;
 
         let material = new THREE.MeshStandardMaterial({ color: Colours.River.Stream });
-        let geometry = new THREE.BoxBufferGeometry(width, height, depth);
+        let geometry = new THREE.BoxGeometry(width, height, depth);
         let parentWidth = parentMesh.geometry.parameters.width;
         let parentHeight = parentMesh.geometry.parameters.height;
         let parentDepth = parentMesh.geometry.parameters.depth;
