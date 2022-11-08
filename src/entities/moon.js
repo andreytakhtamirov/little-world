@@ -3,7 +3,7 @@ import * as Colours from "../properties/colours"
 
 export default class Moon {
     constructor(positionX, positionY, positionZ, size) {
-        const moonGeometry = new THREE.BoxBufferGeometry(size, size, size);
+        const moonGeometry = new THREE.BoxGeometry(size, size, size);
         const moonLine = new THREE.LineSegments(new THREE.EdgesGeometry(moonGeometry), new THREE.LineBasicMaterial({color: Colours.Moon.Outline}));
         const moonMaterial = new THREE.MeshStandardMaterial({color: Colours.Moon.Material});
         this.mesh = new THREE.Mesh(moonGeometry, moonMaterial);

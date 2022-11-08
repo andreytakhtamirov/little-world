@@ -4,7 +4,7 @@ import * as Colours from "../properties/colours"
 
 export default class Sun {
     constructor(positionX, positionY, positionZ, size, lightColour, intensity) {
-        const starGeometry = new THREE.BoxBufferGeometry(size, size, size);
+        const starGeometry = new THREE.BoxGeometry(size, size, size);
         const starMaterial = new THREE.MeshStandardMaterial({color: Colours.Star.Material});
 
         this.mesh = new THREE.Mesh(starGeometry, starMaterial);

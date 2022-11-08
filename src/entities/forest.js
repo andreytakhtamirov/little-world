@@ -32,7 +32,7 @@ class Tree {
         const stemDepth = stemWidth;    // Tree trunk will be square-based
 
         let stemMaterial = new THREE.MeshLambertMaterial({ color: Colours.Tree.Stem });
-        let stemGeometry = new THREE.BoxBufferGeometry(stemWidth, stemHeight, stemDepth);
+        let stemGeometry = new THREE.BoxGeometry(stemWidth, stemHeight, stemDepth);
 
         this.mesh = new THREE.Mesh(stemGeometry, stemMaterial);
 
@@ -205,7 +205,7 @@ class Leaf {
             randomColour = new THREE.Color(Colours.Tree.SnowyLeaves[(Utils.randomInteger(0, Colours.Tree.SnowyLeaves.length - 1))]);
         }
         let leafMaterial = new THREE.MeshLambertMaterial({ color: randomColour });
-        let leafGeometry = new THREE.BoxBufferGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
+        let leafGeometry = new THREE.BoxGeometry(leafWidthHeightDepth, leafWidthHeightDepth, leafWidthHeightDepth);
 
         this.mesh = new THREE.Mesh(leafGeometry, leafMaterial);
         this.mesh.castShadow = true;

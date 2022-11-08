@@ -33,7 +33,7 @@ export default class World {
         if (weather.conditions.includes('snowy')) {
             worldColour = Colours.World.SnowyGrass;
         }
-        const worldGeometry = new THREE.BoxBufferGeometry(width, height, depth);
+        const worldGeometry = new THREE.BoxGeometry(width, height, depth);
         const grassMaterial = new THREE.MeshPhongMaterial({color: worldColour});
 
         this.mesh = new THREE.Mesh(worldGeometry, grassMaterial);
@@ -72,7 +72,7 @@ export default class World {
                     for (let m = 0; m < tree.children.length; m++) {
                         let leaf = tree.children[m];
                         let oldSize = leafDimensions[m];
-                        let leafGeometry = new THREE.BoxBufferGeometry(oldSize * scale, oldSize * scale, oldSize * scale);
+                        let leafGeometry = new THREE.BoxGeometry(oldSize * scale, oldSize * scale, oldSize * scale);
                         leaf.geometry.dispose();
                         leaf.geometry = leafGeometry;
                         leaf.updateMatrix();

@@ -9,7 +9,7 @@ export default class RainDrop {
         const depth = width;
 
         let material = new THREE.MeshStandardMaterial({color: Colours.Rain.Material});
-        let geometry = new THREE.BoxBufferGeometry(width, height, depth);
+        let geometry = new THREE.BoxGeometry(width, height, depth);
         let parentWidth = parentMesh.geometry.parameters.width;
         let parentDepth = parentMesh.geometry.parameters.depth;
         const positionX = Utils.randomNumber(-parentWidth / 2, parentWidth / 2);

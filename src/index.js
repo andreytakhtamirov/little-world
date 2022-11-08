@@ -20,7 +20,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
 import Settings from "./components/Settings";
 import ActionButtons from "./components/ActionButtons";
-import Heading from "./components/Heading"
 
 class App extends Component {
     constructor(props) {
@@ -30,6 +29,17 @@ class App extends Component {
         this.state = {
             isPlaying: false
         };
+
+        /* Check if user has set a custom resolution setting already.
+            If resolution matches one of the available ones, load it.
+        */
+        let storedResolution = localStorage.getItem(Constants.Page.ResolutionStorageKey);
+        if (storedResolution != null &&
+            Constants.Page.ResolutionWidths.indexOf(parseInt(storedResolution)) != -1) {
+            Constants.Page.SetResolutionWidth = parseInt(storedResolution);
+        } else {
+            Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[2]; // Set default to medium
+        }
     }
 
     componentDidMount() {
@@ -87,35 +97,6 @@ class App extends Component {
         setResolution(resolutionWidth);
     };
 
-    getCurrentResolution() {
-        let resolutions = Constants.Page.ResolutionWidths;
-        let resolutionWidth = Constants.Page.SetResolutionWidth;
-        let resolutionValue = "";
-        let index = resolutions.indexOf(resolutionWidth);
-        switch (index) {
-            case 0:
-                resolutionValue = "ultra_low";
-                break;
-            case 1:
-                resolutionValue = "low";
-                break;
-            case 2:
-                resolutionValue = "medium";
-                break;
-            case 3:
-                resolutionValue = "high";
-                break;
-            case 4:
-                resolutionValue = "ultra";
-                break;
-            default:
-                resolutionValue = "medium";
-                break;
-        }
-
-        return resolutionValue;
-    }
-
     render() {
         return (<div ref={(mount) => {
         }}>
@@ -130,7 +111,7 @@ class App extends Component {
                     refreshButton={this.refreshButton}
                     onRefreshClick={this.onRefreshClick} />
             }
-            <Settings onChange={this.handleChange} setResolution={this.getCurrentResolution} />
+            <Settings onChange={this.handleChange} />
         </div>)
     }
 }
@@ -154,7 +135,6 @@ function initializeScene() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, Constants.World.Width * Constants.World.Depth * Constants.World.SidesCount);
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[2]; // Set default to medium
     setResolution(Constants.Page.SetResolutionWidth);
 
     // Show stats (framerate)
@@ -176,6 +156,7 @@ function setResolution(resolutionWidth) {
     let screenWidth = window.innerWidth * window.devicePixelRatio;
     Constants.Page.ResolutionRatio = resolutionWidth / screenWidth;
     renderer.setPixelRatio(Constants.Page.ResolutionRatio);
+    localStorage.setItem(Constants.Page.ResolutionStorageKey,resolutionWidth);
 }
 
 function purgeWorld(obj) {

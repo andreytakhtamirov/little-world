@@ -32,7 +32,7 @@ export default class River {
         }
 
         const material = new THREE.MeshStandardMaterial({ color: Colours.River.Material });
-        const geometry = new THREE.BoxBufferGeometry(worldLength + 1, worldHeight + 1, width);
+        const geometry = new THREE.BoxGeometry(worldLength + 1, worldHeight + 1, width);
 
         this.mesh = new THREE.Mesh(geometry, material);
 

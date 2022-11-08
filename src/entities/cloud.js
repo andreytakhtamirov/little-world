@@ -42,7 +42,7 @@ export default class Cloud {
 class CloudPart {
     constructor(cloudWidthHeightDepth) {
         const cloudMaterial = new THREE.MeshStandardMaterial({color: Colours.Cloud.Material});
-        const cloudGeometry = new THREE.BoxBufferGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
+        const cloudGeometry = new THREE.BoxGeometry(cloudWidthHeightDepth, cloudWidthHeightDepth, cloudWidthHeightDepth);
 
         this.mesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
 
