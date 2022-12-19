@@ -29,6 +29,8 @@ export default class River {
                 posZ = position;
                 rotation = 0;
                 break;
+            default:
+                break;
         }
 
         const material = new THREE.MeshStandardMaterial({ color: Colours.River.Material });

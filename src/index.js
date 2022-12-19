@@ -35,7 +35,7 @@ class App extends Component {
         */
         let storedResolution = localStorage.getItem(Constants.Page.ResolutionStorageKey);
         if (storedResolution != null &&
-            Constants.Page.ResolutionWidths.indexOf(parseInt(storedResolution)) != -1) {
+            Constants.Page.ResolutionWidths.indexOf(parseInt(storedResolution)) !== -1) {
             Constants.Page.SetResolutionWidth = parseInt(storedResolution);
         } else {
             Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[2]; // Set default to medium
@@ -137,6 +137,9 @@ function initializeScene() {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     setResolution(Constants.Page.SetResolutionWidth);
 
+    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[0]; // Set default to medium
+    setResolution(Constants.Page.SetResolutionWidth);
+
     // Show stats (framerate)
     stats = new Stats();
     document.body.appendChild(stats.dom);
@@ -166,7 +169,7 @@ function purgeWorld(obj) {
     }
     if (obj.geometry) {
         obj.geometry.dispose();
-    };
+    }
 
     if (obj.material) {
         Object.keys(obj.material).forEach(prop => {

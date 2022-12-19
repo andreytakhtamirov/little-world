@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 export default class Pointer {
 
-    constructor(parentPositionVector, parentHeight) {
+    constructor(parentPositionVector) {
         const front = Math.tan(Math.PI / 6)
         const back = Math.cos(Math.PI / 6)
         const vertices = [
