@@ -137,9 +137,6 @@ function initializeScene() {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     setResolution(Constants.Page.SetResolutionWidth);
 
-    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[0]; // Set default to medium
-    setResolution(Constants.Page.SetResolutionWidth);
-
     // Show stats (framerate)
     stats = new Stats();
     document.body.appendChild(stats.dom);
@@ -323,7 +320,7 @@ function animate() {
         let world = worlds[i];
         animateClouds(world);
         if (rotateWorld) {
-            world.mesh.rotation.y += Utils.getRadians(0.10);
+            world.mesh.rotation.y += Utils.getRadians(Constants.World.RotationSpeed);
         }
         if (player != null) {
             detectPlayerHits(player, world);
@@ -442,48 +439,17 @@ function animateClouds(parentWorld) {
         }
     }
 
-    // ---------------- WHOLE CLOUD MOVEMENT ---------------- //ss
+    // ---------------- CLOUD MOVEMENT ---------------- //
     for (let i = 0; i < clouds.length; i++) {
         let cloud = clouds[i];
-        cloud.group.translateX(Constants.Cloud.WindSpeedX);
-        cloud.group.translateY(Constants.Cloud.WindSpeedY);
-        cloud.group.translateX(Constants.Cloud.WindSpeedZ);
+        let newCloud = cloud.animate(parentWorld);
 
-        if (cloud.group.position.x > parentWorld.mesh.geometry.parameters.width / 2
-            || cloud.group.position.x < -parentWorld.mesh.geometry.parameters.width / 2
-            || cloud.group.position.y > 30 || cloud.group.position.y < 10
-            || cloud.group.position.z > parentWorld.mesh.geometry.parameters.depth / 2
-            || cloud.group.position.z < -parentWorld.mesh.geometry.parameters.depth / 2) {
-            for (let j = 0; j < cloud.group.children.length; j++) {
-                cloud.group.children[j].geometry.dispose();
-                cloud.group.children[j].material.dispose();
-            }
-            parentWorld.mesh.remove(cloud.group);
-
-            clouds[i] = new Cloud();
+        if (newCloud != null) {
+            // Cloud movement resulted in the cloud needing to be recreated
+            parentWorld.mesh.remove(clouds[i].group);
+            clouds[i] = newCloud;
             parentWorld.mesh.add(clouds[i].group);
         }
-    }
-
-    // ---------------- CLOUD PARTICLE MOVEMENT ---------------- //
-    for (let i = 0; i < clouds.length; i++) {
-        for (let j = 0; j < clouds[i].particles.length; j++) {
-            let particle = clouds[i].particles[j];
-            particle.mesh.translateX(particle.movementXYZ[0]);
-            particle.mesh.translateY(particle.movementXYZ[1]);
-            particle.mesh.translateZ(particle.movementXYZ[2]);
-            if (clouds[i].movementCounter % (clouds[i].movement * 2) === 0) {
-                particle.movementXYZ[0] = -particle.movementXYZ[0];
-                particle.movementXYZ[1] = -particle.movementXYZ[1];
-                particle.movementXYZ[2] = -particle.movementXYZ[2];
-            } else if (clouds[i].movementCounter % clouds[i].movement === 0) {
-                clouds[i].resetMovement();
-                for (let j = 0; j < clouds[i].particles.length; j++) {
-                    Utils.setObjectSpeed(clouds[i].particles[j].movementXYZ, Constants.Cloud.ParticleMoveSpeed);
-                }
-            }
-        }
-        clouds[i].movementCounter++;
     }
 }
 

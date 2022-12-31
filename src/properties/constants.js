@@ -5,7 +5,7 @@ const ResolutionWidths = [480, 720, 1920, 2560, 4000];
 var SetResolutionWidth = 1;
 var ResolutionRatio = 1;
 const WorldSidesCount = 1;
-const WorldRotationSpeed = 0.001;
+const WorldRotationSpeed = 0.10;
 const WorldWidth = 50;
 const WorldHeight = 5;
 const WorldDepth = 50;
@@ -14,8 +14,10 @@ const MinCloudsCount = 3;
 const MaxCloudsCount = 10;
 const RainDropsPerCloud = 30;
 const CloudMovementSpeed = 0.004;
-const CloudParticleMovementSpeed = 0.001;
+const CloudParticleMovementSpeed = 0.5;
 const CloudParticleMoveTimeOut = 300;
+const CloudParticleMinHeight = 15;
+const CloudParticleMaxHeight = 20;
 
 const WindSpeedX = Utils.randomNumber(-CloudMovementSpeed, CloudMovementSpeed);
 const WindSpeedY = 0;
@@ -97,6 +99,14 @@ export class Cloud {
 
     static get ParticleMoveTimeOut() {
         return CloudParticleMoveTimeOut;
+    }
+
+    static get ParticleMinHeight() {
+        return CloudParticleMinHeight;
+    }
+
+    static get ParticleMaxHeight() {
+        return CloudParticleMaxHeight;
     }
 
     static get WindSpeedX() {
