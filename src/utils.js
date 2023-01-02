@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 export default class Utils {
     static randomNumber(min, max) {
         return Math.random() * (max - min) + min;
@@ -80,5 +82,47 @@ export default class Utils {
         }
 
         return color(r, g, b);
+    }
+
+    static detectCollision(object1, object2) {
+        object1.geometry.computeBoundingBox();
+        object2.geometry.computeBoundingBox();
+        object1.updateMatrixWorld(true);
+        object2.updateMatrixWorld(true);
+    
+        let box1 = object1.geometry.boundingBox.clone();
+        box1.applyMatrix4(object1.matrixWorld);
+        let box2 = object2.geometry.boundingBox.clone();
+        box2.applyMatrix4(object2.matrixWorld);
+    
+        return box1.intersectsBox(box2);
+    }
+    
+    static detectSnowCollision(object1, object2) {
+        object1.geometry.computeBoundingBox();
+        object2.geometry.computeBoundingBox();
+        object1.updateMatrixWorld();
+        object2.updateMatrixWorld();
+    
+        let box1 = new THREE.Box3();
+        box1.setFromObject(object1);
+        box1.applyMatrix4(object1.matrixWorld);
+    
+        let box2 = new THREE.Box3();
+        box2.setFromObject(object2);
+        box2.applyMatrix4(object2.matrixWorld);
+    
+        return box1.intersectsBox(box2);
+    }
+
+    static distanceFromPointToCircle(circleRadius, hittingObject, targetObject) {
+        let object1Position = new THREE.Vector3();
+        let object2Position = new THREE.Vector3();
+        hittingObject.updateMatrixWorld(true);
+        targetObject.updateMatrixWorld(true);
+        targetObject.getWorldPosition(object1Position);
+        hittingObject.getWorldPosition(object2Position);
+    
+        return Math.pow(circleRadius, 2) - (Math.pow(object1Position.x - object2Position.x, 2) + Math.pow(object1Position.z - object2Position.z, 2));
     }
 }
