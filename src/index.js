@@ -11,8 +11,6 @@ import World from "./entities/world";
 import * as Constants from "./properties/constants";
 import Stats from "three/examples/jsm/libs/stats.module";
 import Weather from "./properties/weather";
-import Snow from "./entities/particles/snow";
-import Rain from "./entities/particles/rain";
 import Player from "./entities/player";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
@@ -137,9 +135,6 @@ function initializeScene() {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     setResolution(Constants.Page.SetResolutionWidth);
 
-    Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[0]; // Set default to medium
-    setResolution(Constants.Page.SetResolutionWidth);
-
     // Show stats (framerate)
     stats = new Stats();
     document.body.appendChild(stats.dom);
@@ -193,7 +188,7 @@ function initializeWorld() {
     light = new THREE.DirectionalLight(0xffffff, 0.8);
     scene.add(light);
 
-    let randomWeather = Utils.randomInteger(1, 6);
+    let randomWeather = Utils.randomInteger(1, 6);    
     weather = new Weather(randomWeather);
     scene.background = weather.sceneBackground;
     for (let i = 0; i < weather.ambientLights.length; i++) {
@@ -251,10 +246,7 @@ function initializeWorld() {
             worlds[i].forests.push(forest);
             worlds[i].mesh.add(forest.group);
         }
-        // if (weather.conditions === 'snowy') {
-        //     // temporary as snow from different clouds will keep stacking
-        //     worlds[i].numClouds = 1;
-        // }
+
         for (let j = 0; j < worlds[i].numClouds; j++) {
             let cloud = new Cloud();
             worlds[i].clouds.push(cloud);
@@ -323,13 +315,16 @@ function animate() {
         let world = worlds[i];
         animateClouds(world);
         if (rotateWorld) {
-            world.mesh.rotation.y += Utils.getRadians(0.10);
+            world.mesh.rotation.y += Utils.getRadians(Constants.World.RotationSpeed);
         }
         if (player != null) {
-            detectPlayerHits(player, world);
-            //checkClosestTree(player, worlds[i]);
+            checkClosestTree(player, worlds[i]);
+            detectPlayerHits(player);
         }
-        world.river.animate();
+
+        if (world.river != null) {
+            world.river.animate();
+        }
     }
 
     renderer.render(scene, camera);
@@ -351,7 +346,6 @@ function setCamera(isPlaying) {
 }
 
 function loadPlayer() {
-    rotateWorld = false;
     let world = worlds[0];
     const mtlLoader = new MTLLoader();
     mtlLoader.load("/models/beaver.vox.mtl", mtlParseResult => {
@@ -374,16 +368,14 @@ function loadPlayer() {
 
 }
 
-function detectPlayerHits(player, world) {
+function detectPlayerHits(player) {
     if (player == null || !player.isHitting) {
         return;
     }
 
-    let closestTree = findClosestTree(player, world);
-
-    if (closestTree != null) {
+    if (player.closestTree != null) {
         player.isHitting = false;
-        closestTree.showHitAnimation(scene);
+        player.closestTree.showHitAnimation(scene);
     }
 }
 
@@ -396,9 +388,22 @@ function checkClosestTree(player, world) {
 
     if (closestTree != null) {
         if (player.closestTree !== closestTree) {
+            // Closest tree has changed
+            if (player.closestTree != null) {
+                // Hide animation for last closest tree
+                player.closestTree.hideProximityAnimation();
+            }
+
+            // Set new closest tree and start animation
             player.closestTree = closestTree;
-            closestTree.showSelectedTree(scene);
+            closestTree.showProximityAnimation();
         }
+    } else {
+        // player is not close to any tree
+        if (player.closestTree != null) {
+            player.closestTree.hideProximityAnimation();
+        }
+        player.closestTree = null;
     }
 }
 
@@ -417,7 +422,7 @@ function findClosestTree(player, world) {
                 continue;
             }
 
-            let distance = distanceFromPointToCircle(player.hitBox, player.mesh, tree.mesh);
+            let distance = Utils.distanceFromPointToCircle(player.hitBox, player.mesh, tree.mesh);
             if (distance > 0 && distance > closestHitDistance) {
                 closestHitDistance = distance;
                 closestTree = tree;
@@ -428,255 +433,19 @@ function findClosestTree(player, world) {
 }
 
 function animateClouds(parentWorld) {
-    // TODO Redo using Tween
     let clouds = parentWorld.clouds;
 
-    // ---------------- SNOW MOVEMENT ---------------- //
-    if (weather.conditions === 'snowy') {
-        for (let i = 0; i < clouds.length; i++) {
-            animateSnow(parentWorld, clouds[i], clouds[i].snow);
-        }
-    } else if (weather.conditions === 'rainy') {
-        for (let i = 0; i < clouds.length; i++) {
-            animateRain(parentWorld, clouds[i], clouds[i].rain);
-        }
-    }
-
-    // ---------------- WHOLE CLOUD MOVEMENT ---------------- //ss
     for (let i = 0; i < clouds.length; i++) {
         let cloud = clouds[i];
-        cloud.group.translateX(Constants.Cloud.WindSpeedX);
-        cloud.group.translateY(Constants.Cloud.WindSpeedY);
-        cloud.group.translateX(Constants.Cloud.WindSpeedZ);
+        let newCloud = cloud.animate(parentWorld, weather.conditions);
 
-        if (cloud.group.position.x > parentWorld.mesh.geometry.parameters.width / 2
-            || cloud.group.position.x < -parentWorld.mesh.geometry.parameters.width / 2
-            || cloud.group.position.y > 30 || cloud.group.position.y < 10
-            || cloud.group.position.z > parentWorld.mesh.geometry.parameters.depth / 2
-            || cloud.group.position.z < -parentWorld.mesh.geometry.parameters.depth / 2) {
-            for (let j = 0; j < cloud.group.children.length; j++) {
-                cloud.group.children[j].geometry.dispose();
-                cloud.group.children[j].material.dispose();
-            }
-            parentWorld.mesh.remove(cloud.group);
-
-            clouds[i] = new Cloud();
+        if (newCloud != null) {
+            // Cloud movement resulted in the cloud needing to be recreated
+            parentWorld.mesh.remove(clouds[i].group);
+            clouds[i] = newCloud;
             parentWorld.mesh.add(clouds[i].group);
         }
     }
-
-    // ---------------- CLOUD PARTICLE MOVEMENT ---------------- //
-    for (let i = 0; i < clouds.length; i++) {
-        for (let j = 0; j < clouds[i].particles.length; j++) {
-            let particle = clouds[i].particles[j];
-            particle.mesh.translateX(particle.movementXYZ[0]);
-            particle.mesh.translateY(particle.movementXYZ[1]);
-            particle.mesh.translateZ(particle.movementXYZ[2]);
-            if (clouds[i].movementCounter % (clouds[i].movement * 2) === 0) {
-                particle.movementXYZ[0] = -particle.movementXYZ[0];
-                particle.movementXYZ[1] = -particle.movementXYZ[1];
-                particle.movementXYZ[2] = -particle.movementXYZ[2];
-            } else if (clouds[i].movementCounter % clouds[i].movement === 0) {
-                clouds[i].resetMovement();
-                for (let j = 0; j < clouds[i].particles.length; j++) {
-                    Utils.setObjectSpeed(clouds[i].particles[j].movementXYZ, Constants.Cloud.ParticleMoveSpeed);
-                }
-            }
-        }
-        clouds[i].movementCounter++;
-    }
-}
-
-function animateSnow(parentWorld, parentCloud, snow) {
-    let forests = parentWorld.forests;
-    let snowProbability = Utils.randomInteger(1, 40);
-    if (snowProbability === 1) {
-        snow[snow.length] = new Snow(parentCloud.group.children[0]);
-        parentCloud.group.add(snow[snow.length - 1].mesh);
-    }
-
-    for (let i = 0; i < snow.length; i++) {
-        if (snow[i].timeOut > 0) {
-            snow[i].timeOut--;
-            continue;
-        }
-        if (!snow[i].hasCollided) {
-            snow[i].mesh.translateY(-snow[i].fallSpeed);
-        } else {
-            continue;
-        }
-
-        if (detectCollision(snow[i].mesh, parentWorld.mesh)) {
-            snowCollision(snow[i], 10);
-
-            let collidedWithSnow = false;
-            for (let j = 0; j < snow.length; j++) {
-                if (i === j || !snow[j].hasCollided) {
-                    continue;
-                }
-                if (detectSnowCollision(snow[i].mesh, snow[j].mesh)) {
-                    parentWorld.mesh.remove(snow[i].mesh);
-                    snow[i].mesh.geometry.dispose();
-                    snow[i].mesh.material.dispose();
-                    collidedWithSnow = true;
-                    snow[j].mesh.geometry.scale(1, 1, 1);
-                    snow.splice(i, 1);
-                    break;
-                }
-            }
-            if (collidedWithSnow) {
-                break;
-            }
-
-            continue;
-        }
-
-        for (let j = 0; j < forests.length; j++) {
-            let trees = forests[j].trees;
-
-            for (let k = 0; k < trees.length; k++) {
-                let treeLeaves = trees[k].mesh.children;
-
-                for (let m = 0; m < treeLeaves.length; m++) {
-                    let treeLeaf = treeLeaves[m];
-
-                    if (detectCollision(snow[i].mesh, treeLeaf)) {
-                        snowCollision(snow[i], 5);
-
-                        let collidedWithSnow = false;
-                        for (let n = 0; n < snow.length; n++) {
-                            if (i === n || !snow[n].hasCollided) {
-                                continue;
-                            }
-                            if (detectSnowCollision(snow[i].mesh, snow[n].mesh)) {
-                                parentWorld.mesh.remove(snow[i].mesh);
-                                snow[i].mesh.geometry.dispose();
-                                snow[i].mesh.material.dispose();
-                                collidedWithSnow = true;
-                                snow.splice(i, 1);
-                                break;
-                            }
-                        }
-                        if (collidedWithSnow) {
-                            break;
-                        }
-                        break;
-                    }
-                }
-                if (snow[i] == null || snow[i].hasCollided) {
-                    break;
-                }
-            }
-            if (snow[i] == null || snow[i].hasCollided) {
-                break;
-            }
-        }
-    }
-
-    function snowCollision(snowFlake, x, y = 1, z = x) {
-        snowFlake.hasCollided = true;
-        parentWorld.mesh.attach(snowFlake.mesh);
-        parentCloud.group.remove(snowFlake.mesh);
-        snowFlake.mesh.geometry.scale(x, y, z);
-        snowFlake.mesh.updateMatrix();
-    }
-}
-
-function animateRain(parentWorld, parentCloud, rain) {
-    let forests = parentWorld.forests;
-    let rainProbability = Utils.randomInteger(1, 10);
-    if (rainProbability === 1) {
-        rain[rain.length] = new Rain(parentCloud.group.children[0]);
-        parentCloud.group.add(rain[rain.length - 1].mesh);
-    }
-
-    for (let i = 0; i < rain.length; i++) {
-        if (rain[i].timeOut > 0) {
-            rain[i].timeOut--;
-            continue;
-        }
-        if (!rain[i].hasCollided) {
-            rain[i].mesh.translateY(-rain[i].fallSpeed);
-        } else {
-            continue;
-        }
-
-        if (detectCollision(rain[i].mesh, parentWorld.mesh)) {
-            parentCloud.group.remove(rain[i].mesh);
-            rain[i].mesh.geometry.dispose();
-            rain[i].mesh.material.dispose();
-            rain.splice(i, 1);
-            continue;
-        }
-
-        for (let j = 0; j < forests.length; j++) {
-            let trees = forests[j].trees;
-
-            for (let k = 0; k < trees.length; k++) {
-                let treeLeaves = trees[k].mesh.children;
-
-                for (let m = 0; m < treeLeaves.length; m++) {
-                    let treeLeaf = treeLeaves[m];
-
-                    if (detectCollision(rain[i].mesh, treeLeaf)) {
-                        parentCloud.group.remove(rain[i].mesh);
-                        rain[i].mesh.geometry.dispose();
-                        rain[i].mesh.material.dispose();
-                        rain.splice(i, 1);
-                        break;
-                    }
-                }
-                if (rain[i] == null) {
-                    break;
-                }
-            }
-            if (rain[i] == null) {
-                break;
-            }
-        }
-    }
-}
-
-function distanceFromPointToCircle(circleRadius, hittingObject, targetObject) {
-    let object1Position = new THREE.Vector3();
-    let object2Position = new THREE.Vector3();
-    hittingObject.updateMatrixWorld(true);
-    targetObject.updateMatrixWorld(true);
-    targetObject.getWorldPosition(object1Position);
-    hittingObject.getWorldPosition(object2Position);
-
-    return Math.pow(circleRadius, 2) - (Math.pow(object1Position.x - object2Position.x, 2) + Math.pow(object1Position.z - object2Position.z, 2));
-}
-
-function detectCollision(object1, object2) {
-    object1.geometry.computeBoundingBox();
-    object2.geometry.computeBoundingBox();
-    object1.updateMatrixWorld(true);
-    object2.updateMatrixWorld(true);
-
-    let box1 = object1.geometry.boundingBox.clone();
-    box1.applyMatrix4(object1.matrixWorld);
-    let box2 = object2.geometry.boundingBox.clone();
-    box2.applyMatrix4(object2.matrixWorld);
-
-    return box1.intersectsBox(box2);
-}
-
-function detectSnowCollision(object1, object2) {
-    object1.geometry.computeBoundingBox();
-    object2.geometry.computeBoundingBox();
-    object1.updateMatrixWorld();
-    object2.updateMatrixWorld();
-
-    let box1 = new THREE.Box3();
-    box1.setFromObject(object1);
-    box1.applyMatrix4(object1.matrixWorld);
-
-    let box2 = new THREE.Box3();
-    box2.setFromObject(object2);
-    box2.applyMatrix4(object2.matrixWorld);
-
-    return box1.intersectsBox(box2);
 }
 
 function stopAnimations() {
