@@ -198,28 +198,27 @@ function initializeWorld() {
     const worldWidth = Constants.World.Width;
     const worldDepth = Constants.World.Depth;
 
-    // Set up tiled world
+    // Set up 6-sided planet
     for (let i = 0; i < Constants.World.SidesCount; i++) {
         worlds[i] = new World(weather);
         if (i === 0) {
             scene.add(worlds[0].mesh);
         } else {
-            if (i % 8 === 0) {
-                worlds[i].mesh.position.set(worldWidth, 0, worldDepth);
-            } else if (i % 7 === 0) {
-                worlds[i].mesh.position.set(0, 0, worldDepth);
-            } else if (i % 6 === 0) {
-                worlds[i].mesh.position.set(-worldWidth, 0, worldDepth);
-            } else if (i % 5 === 0) {
-                worlds[i].mesh.position.set(worldWidth, 0, 0);
+            if (i % 5 === 0) {
+                worlds[i].mesh.rotation.x = Utils.getRadians(180);
+                worlds[i].mesh.position.set(0, -worldWidth, 0);
             } else if (i % 4 === 0) {
-                worlds[i].mesh.position.set(worldWidth, 0, -worldDepth);
+                worlds[i].mesh.rotation.z = Utils.getRadians(270);
+                worlds[i].mesh.position.set(worldWidth/2, -worldDepth/2, 0);
             } else if (i % 3 === 0) {
-                worlds[i].mesh.position.set(0, 0, -worldDepth);
+                worlds[i].mesh.rotation.x = Utils.getRadians(90);
+                worlds[i].mesh.position.set(0, -worldWidth/2, worldWidth/2);
             } else if (i % 2 === 0) {
-                worlds[i].mesh.position.set(-worldWidth, 0, 0);
-            } else if (i % 2 - 1 === 0) {
-                worlds[i].mesh.position.set(-worldWidth, 0, -worldDepth);
+                worlds[i].mesh.rotation.z = Utils.getRadians(90);
+                worlds[i].mesh.position.set(-worldWidth/2, -worldWidth/2, 0);
+            } else if (i % 1 === 0) {
+                worlds[i].mesh.rotation.x = Utils.getRadians(270);
+                worlds[i].mesh.position.set(0, -worldWidth/2, -worldWidth/2);
             }
             worlds[0].mesh.add(worlds[i].mesh);
         }
@@ -353,7 +352,7 @@ function loadPlayer() {
         objLoader.setMaterials(mtlParseResult);
         objLoader.load("/models/beaver.vox.obj", function (obj) {
             obj.scale.set(1.1, 1.1, 1.1);
-            obj.translateX(world.mesh.geometry.parameters.width / 2.5);
+            obj.translateX(0);
             obj.translateY(world.mesh.geometry.parameters.height / 2);
             obj.translateZ(world.mesh.geometry.parameters.depth / 2.5);
             obj.rotation.set(0, Utils.getRadians(180), 0);

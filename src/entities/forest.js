@@ -46,48 +46,58 @@ class Tree {
         this.mesh.castShadow = true;
 
         this.leaves = [];
+        this.shouldContinueAnimation = false;
 
         for (let i = 0; i < leavesInTree; i++) {
             let leaf = new Leaf(this.mesh, weather, i === 0);
             this.leaves[i] = leaf;
             this.mesh.add(leaf.mesh);
         }
-        this.mesh.rotation.y = Math.random() * 360;
+        this.mesh.rotation.y = Utils.getRadians(360);
         this.mesh.renderOrder = 1;
+
+        const stemMesh = this.mesh;
+        let r = stemMesh.material.color.r;
+        let g = stemMesh.material.color.g;
+        let b = stemMesh.material.color.b;
+
+        let colour = { r: r, g: g, b: b };
+        this.highlight = new TWEEN.Tween(colour).to({
+            r: r + 1,
+            g: g,
+            b: b + 1
+        }, 500).onUpdate(function ({ r, g, b }) {
+            stemMesh.material.color.r = r;
+            stemMesh.material.color.g = g;
+            stemMesh.material.color.b = b;
+        });
+
+        const tree = this;
+
+        this.unHighlight = new TWEEN.Tween({ r: r + 1, g: g, b: b + 1 }).to({
+            r: r,
+            g: g,
+            b: b
+        }, 500).onUpdate(function ({ r, g, b }) {
+            stemMesh.material.color.r = r;
+            stemMesh.material.color.g = g;
+            stemMesh.material.color.b = b;
+        }).onComplete(function() {
+            if (tree.shouldContinueAnimation) {
+                tree.highlight.start();
+            }
+        });
+    }
+
+    showHighlightAnimation() {
+        this.highlight.chain(this.unHighlight);
+        this.highlight.start();
     }
 
     showHitAnimation(scene) {
         let tree = this.mesh;
         let treePosition = new THREE.Vector3();
         tree.getWorldPosition(treePosition);
-
-        for (let i = 0; i < 3; i++) {
-            let sparkle = new Sparkle(treePosition, tree.geometry.parameters.height).mesh;
-            scene.add(sparkle);
-
-            let float = { offsetY: sparkle.position.y };
-            let up = new TWEEN.Tween(float).to({
-                offsetY: 15
-            }, 4000).onUpdate(function ({ offsetY }) {
-                sparkle.position.y = offsetY;
-            });
-
-            const constScene = scene;
-            let fade = { opacity: (sparkle.opacity * 100) };
-            let disappear = new TWEEN.Tween(fade).to({
-                opacity: 0.01
-            }, 1500).onUpdate(function ({ opacity }) {
-                sparkle.material.opacity -= opacity;
-            }).onComplete(function () {
-                sparkle.geometry.dispose();
-                sparkle.material.dispose();
-                constScene.remove(sparkle);
-            });
-
-            up.easing(TWEEN.Easing.Sinusoidal.Out);
-            up.start();
-            disappear.start()
-        }
 
         let colour = { colour: 14017487 };
         let initialTrunkColour = tree.material.color.getHex();
@@ -181,6 +191,23 @@ class Tree {
             down.start();
         }
     }
+
+    showProximityAnimation() {
+        for (let i = 0; i < this.leaves.length; i++) {
+            this.leaves[i].showHighlightAnimation();
+            this.leaves[i].shouldContinueAnimation = true;
+        }
+        this.shouldContinueAnimation = true;
+        this.showHighlightAnimation();
+    }
+
+    hideProximityAnimation() {
+        this.shouldContinueAnimation = false;
+
+        for (let i = 0; i < this.leaves.length; i++) {
+           this.leaves[i].shouldContinueAnimation = false;
+        }
+    }
 }
 
 class Leaf {
@@ -212,7 +239,43 @@ class Leaf {
         this.mesh.material.transparent = true;
         this.mesh.position.set(randomLeafPositionX, randomLeafPositionY, randomLeafPositionZ);
 
-        this.movementXYZ = [];
-        Utils.setObjectSpeed(this.movementXYZ, Constants.Forest.LeafMoveSpeed);
+        this.shouldContinueAnimation = false;
+
+        const leafMesh = this.mesh;
+        let r = leafMesh.material.color.r;
+        let g = leafMesh.material.color.g;
+        let b = leafMesh.material.color.b;
+
+        let colour = { r: r, g: g, b: b };
+        this.highlight = new TWEEN.Tween(colour).to({
+            r: r + 1,
+            g: g,
+            b: b + 1
+        }, 500).onUpdate(function ({ r, g, b }) {
+            leafMesh.material.color.r = r;
+            leafMesh.material.color.g = g;
+            leafMesh.material.color.b = b;
+        });
+
+        const leaf = this;
+
+        this.unHighlight = new TWEEN.Tween({ r: r + 1, g: g, b: b + 1}).to({
+            r: r,
+            g: g,
+            b: b
+        }, 500).onUpdate(function ({ r, g, b }) {
+            leafMesh.material.color.r = r;
+            leafMesh.material.color.g = g;
+            leafMesh.material.color.b = b;
+        }).onComplete(function() {
+            if (leaf.shouldContinueAnimation) {
+                leaf.highlight.start();
+            }
+        });
+    }
+
+    showHighlightAnimation() {
+        this.highlight.chain(this.unHighlight);
+        this.highlight.start();
     }
 }
