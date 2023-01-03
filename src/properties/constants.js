@@ -28,6 +28,8 @@ const MaxNumOfForests = 5;
 const TreesPerForest = 10;
 const LeafMovementSpeed = 0.02;
 
+const InitialRiverSpeed = 20;
+
 export class Page {
     static get ResolutionStorageKey() {
         return ResolutionStorageKey;
@@ -137,5 +139,11 @@ export class Forest {
 
     static get LeafMoveSpeed() {
         return LeafMovementSpeed;
+    }
+}
+
+export class River {
+    static get InitialSpeed() {
+        return InitialRiverSpeed;
     }
 }

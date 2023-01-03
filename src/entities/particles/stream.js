@@ -4,7 +4,7 @@ import * as Colours from "../../properties/colours";
 
 export default class Stream {
     constructor(parentMesh) {
-        const width = 1;
+        const width = 2;
         const height = 0.1;
         const depth = height;
 
@@ -14,7 +14,7 @@ export default class Stream {
         let parentHeight = parentMesh.geometry.parameters.height;
         let parentDepth = parentMesh.geometry.parameters.depth;
         const positionX = Utils.randomNumber(-parentWidth / 2 + width / 2, 0 - width / 2);
-        const positionY = parentHeight / 2 - height / 2 - 0.1;
+        const positionY = parentHeight / 2 - height / 2 - 0.1; // Just below water's surface
         const positionZ = Utils.randomNumber(-parentDepth / 2 + depth/2, parentDepth / 2 - depth/2);
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.position.set(positionX, positionY, positionZ);

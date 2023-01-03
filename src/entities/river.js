@@ -4,7 +4,6 @@ import Utils from "../utils";
 import * as Constants from "../properties/constants";
 import * as Colours from "../properties/colours";
 import Stream from "./particles/stream";
-import BigStream from "./particles/bigStream";
 
 export default class River {
     constructor() {
@@ -43,17 +42,14 @@ export default class River {
 
         this.mesh.position.set(posX, posY, posZ);
         this.mesh.rotation.y = rotation;
+
+        this.speed = Constants.River.InitialSpeed;
     }
 
     animate() {
         let riverMesh = this.mesh;
-        // TODO redo with random numbers
         if (riverMesh.children.length < 20) {
-            let stream = new Stream(riverMesh);
-            riverMesh.add(stream.mesh);
-        } else if (riverMesh.children.length < 40) {
-            let bigStream = new BigStream(riverMesh);
-            riverMesh.add(bigStream.mesh);
+            riverMesh.add(new Stream(riverMesh).mesh);
         }
 
         for (let i = 0; i < riverMesh.children.length; i++) {
@@ -65,7 +61,7 @@ export default class River {
             let position = { x: mesh.position.x };
 
             let animateFlow = new TWEEN.Tween(position).to({
-                x: mesh.position.x + 10
+                x: mesh.position.x + this.speed
             }, 1000).onUpdate(function ({ x }) {
             
                 if (mesh.position.x >= riverMesh.geometry.parameters.width/2) {
