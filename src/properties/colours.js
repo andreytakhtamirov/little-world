@@ -51,7 +51,7 @@ export class River {
         return "#195d87";
     }
     static get Stream() {
-        return "rgb(255,255,255)";
+        return "#8691ea";
     }
 }
 

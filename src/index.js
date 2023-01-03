@@ -59,6 +59,7 @@ class App extends Component {
 
     onRefreshClick = () => {
         purgeWorld(scene);
+        controls.reset();
         initializeWorld();
     }
 
@@ -188,7 +189,7 @@ function initializeWorld() {
     light = new THREE.DirectionalLight(0xffffff, 0.8);
     scene.add(light);
 
-    let randomWeather = Utils.randomInteger(1, 6);    
+    const randomWeather = Utils.randomInteger(1, 6);
     weather = new Weather(randomWeather);
     scene.background = weather.sceneBackground;
     for (let i = 0; i < weather.ambientLights.length; i++) {
@@ -253,30 +254,31 @@ function initializeWorld() {
         }
     }
 
-    // Add river
+    // Our main world. This world owns all other worlds and key features (river, player).
     let world = worlds[0];
+
+    // Add river
     let river = new River();
     world.mesh.add(river.mesh);
     world.river = river;
 
-    // Add logic to remove trees that collide with the river
-    // for (let i = 0; i < world.forests.length; i++) {
-    //     let trees = world.forests[i].children;
-    //     console.log("forest group size: " + trees.length);
-    //     for (let j = 0; j < trees.length; j++) {
-    //         let tree = trees[j];
-    //         if (tree == null || world.river.mesh == null) {
-    //             console.log("null mesh");
-    //         }
-    //         if (detectCollision(tree, world.river.mesh)) {
-    //             tree.geometry.dispose();
-    //             tree.material.dispose();
-    //             world.forests[i].group.remove(tree);
-    //             trees.splice(j, 1);
-    //         }
-    //     }
-    // }
+    // Remove trees that are within the river
+    world.forests.forEach(forest => {
+        for (let i = 0; i < forest.trees.length; i++) {
+            let tree = forest.trees[i];
+            if (doesTreeTouchRiver(world.river, tree)) {
+                forest.group.remove(tree.mesh);
+                tree.mesh.geometry.dispose();
+                tree.mesh.material.dispose();
+                forest.trees.splice(i, 1);
 
+                // Since we've just spliced the current index, move back to the next tree
+                i--;
+            }
+        }
+    });
+
+    // Start with a small negative rotation so by the time the page loads the world will look unrotated
     world.mesh.rotation.set(0, Utils.getRadians(-5), 0);
 
     // Animate adding elements
@@ -287,11 +289,26 @@ function initializeWorld() {
     camera.position.set(0, worldWidth * 1.4, worldDepth * 1.6);
     camera.rotation.set(Utils.getRadians(-40), 0, 0);
 
-    // camera.rotation.set(Utils.getRadians(-60), 0, 0);
-    // camera.position.set(0, 50 * 1.1, 50 * 0.7);
     light.position.copy(camera.position);
     light.rotation.copy(camera.rotation);
     controls.saveState();
+}
+
+function doesTreeTouchRiver(river, tree) {
+    let treePosition = new THREE.Vector3();
+    tree.mesh.getWorldPosition(treePosition);
+    
+    const riverX = river.mesh.position.x;
+    const riverZ = river.mesh.position.z;
+    const riverDepth = river.mesh.geometry.parameters.depth;
+
+    const treeX = treePosition.x;
+    const treeZ = treePosition.z;
+    const treeWidth = tree.mesh.geometry.parameters.width;
+
+    // The river has 2 orientations, it either lies on the X-axis or on the Z-axis (covering whole world width).
+    return (riverX !== 0 && treeX - treeWidth/2 <= riverX + riverDepth/2 && treeX + treeWidth/2 >= riverX - riverDepth/2) ||
+           (riverZ !== 0 && treeZ - treeWidth/2 <= riverZ + riverDepth/2 && treeZ + treeWidth/2 >= riverZ - riverDepth/2);
 }
 
 function startAnimationLoop() {
@@ -374,7 +391,7 @@ function detectPlayerHits(player) {
 
     if (player.closestTree != null) {
         player.isHitting = false;
-        player.closestTree.showHitAnimation(scene);
+        player.closestTree.showHitAnimation();
     }
 }
 

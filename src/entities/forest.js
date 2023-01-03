@@ -53,7 +53,7 @@ class Tree {
             this.leaves[i] = leaf;
             this.mesh.add(leaf.mesh);
         }
-        this.mesh.rotation.y = Utils.getRadians(360);
+        this.mesh.rotation.y = Utils.getRadians(Utils.randomNumber(0, 360));
         this.mesh.renderOrder = 1;
 
         const stemMesh = this.mesh;
@@ -94,7 +94,7 @@ class Tree {
         this.highlight.start();
     }
 
-    showHitAnimation(scene) {
+    showHitAnimation() {
         let tree = this.mesh;
         let treePosition = new THREE.Vector3();
         tree.getWorldPosition(treePosition);
