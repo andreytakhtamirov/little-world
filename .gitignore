@@ -1,2 +1,4 @@
 /node_modules/
 .idea/inspectionProfiles/Project_Default.xml
+build/
+package-lock.json
