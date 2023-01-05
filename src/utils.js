@@ -1,12 +1,22 @@
-import * as THREE from "three";
+import { Box3, Vector3, MathUtils } from 'three';
+import * as Constants from './properties/constants';
+
 
 export default class Utils {
-    static randomNumber(min, max) {
+    static randomIntegerOriginal(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    static randomNumberOriginal(min, max) {
         return Math.random() * (max - min) + min;
     }
 
+    static randomNumber(min, max) {
+        return MathUtils.seededRandom(Constants.World.SeedCount) * (max - min) + min;
+    }
+
     static randomInteger(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+        return Math.floor(MathUtils.seededRandom(Constants.World.SeedCount) * (max - min + 1)) + min;
     }
 
     static getWidth(mesh) {
@@ -104,11 +114,11 @@ export default class Utils {
         object1.updateMatrixWorld();
         object2.updateMatrixWorld();
     
-        let box1 = new THREE.Box3();
+        let box1 = new Box3();
         box1.setFromObject(object1);
         box1.applyMatrix4(object1.matrixWorld);
     
-        let box2 = new THREE.Box3();
+        let box2 = new Box3();
         box2.setFromObject(object2);
         box2.applyMatrix4(object2.matrixWorld);
     
@@ -116,8 +126,8 @@ export default class Utils {
     }
 
     static distanceFromPointToCircle(circleRadius, hittingObject, targetObject) {
-        let object1Position = new THREE.Vector3();
-        let object2Position = new THREE.Vector3();
+        let object1Position = new Vector3();
+        let object2Position = new Vector3();
         hittingObject.updateMatrixWorld(true);
         targetObject.updateMatrixWorld(true);
         targetObject.getWorldPosition(object1Position);
