@@ -18,6 +18,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
 import Settings from "./components/Settings";
 import ActionButtons from "./components/ActionButtons";
+import SeedLabel from "./components/SeedLabel";
 
 class App extends Component {
     constructor(props) {
@@ -55,12 +56,14 @@ class App extends Component {
         initializeScene();
         initializeWorld();
         startAnimationLoop();
+        this.setState({ SeedNumber: Constants.World.Seed });
     }
 
     onRefreshClick = () => {
         purgeWorld(scene);
         controls.reset();
         initializeWorld();
+        this.setState({ SeedNumber: Constants.World.Seed });
     }
 
     onPlayClick = () => {
@@ -102,7 +105,6 @@ class App extends Component {
             <Helmet>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0 user-scalable=no" />
             </Helmet>
-            {/* <Heading /> */}
             {!this.state.isPlaying &&
                 <ActionButtons
                     playButton={this.playButton}
@@ -182,6 +184,7 @@ function purgeWorld(obj) {
 }
 
 function initializeWorld() {
+    Constants.World.NewSeed();
     animationActive = true;
     rotateWorld = true;
     worlds = [];
