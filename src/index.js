@@ -18,7 +18,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
 import Settings from "./components/Settings";
 import ActionButtons from "./components/ActionButtons";
-import SeedLabel from "./components/SeedLabel";
 
 class App extends Component {
     constructor(props) {
@@ -281,8 +280,10 @@ function initializeWorld() {
         }
     });
 
-    // Start with a small negative rotation so by the time the page loads the world will look unrotated
-    world.mesh.rotation.set(0, Utils.getRadians(-5), 0);
+    if (rotateWorld) {
+        // Start with a small negative rotation so by the time the page loads the world will look unrotated
+        world.mesh.rotation.set(0, Utils.getRadians(-5), 0);
+    }
 
     // Animate adding elements
     for (let i = 0; i < worlds.length; i++) {
