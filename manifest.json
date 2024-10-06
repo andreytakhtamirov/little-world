@@ -1,0 +1,8 @@
+{
+  "short_name": "Little World",
+  "name": "In Your Own Little World",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
