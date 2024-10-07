@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.js": "/little-world/static/js/main.cc1c49e8.js",
-    "index.html": "/little-world/index.html",
-    "main.cc1c49e8.js.map": "/little-world/static/js/main.cc1c49e8.js.map"
+    "main.js": "/static/js/main.cc1c49e8.js",
+    "index.html": "/index.html",
+    "main.cc1c49e8.js.map": "/static/js/main.cc1c49e8.js.map"
   },
   "entrypoints": [
     "static/js/main.cc1c49e8.js"
