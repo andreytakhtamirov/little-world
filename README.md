@@ -1,4 +1,4 @@
-Hosted on <https://inyourownlittleworld.ca>
+Hosted at <https://inyourownlittleworld.ca>
 
 ## Features
 
@@ -9,9 +9,6 @@ Hosted on <https://inyourownlittleworld.ca>
 - Playable beaver character
 
   - WASD to move and Space to strike nearby trees
-
-Eventually will include functionality for trees to be gathered to build a dam across the river.
-
 
 <img width="30%" alt="sunny" src="https://github.com/andreytakhtamirov/little-world/assets/70922688/48bf555a-c491-4c88-bbb9-d3c0fbea6f79">
 
