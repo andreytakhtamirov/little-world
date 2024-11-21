@@ -18,6 +18,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Helmet from "react-helmet"
 import Settings from "./components/Settings";
 import ActionButtons from "./components/ActionButtons";
+import ControlButtons from "./components/ControlButtons";
 
 class App extends Component {
     constructor(props) {
@@ -71,6 +72,31 @@ class App extends Component {
         setCamera(true);
     }
 
+    onUpClick = () => {
+        if (player == null) return;
+        player.moveUp(camera);
+    }
+
+    onDownClick = () => {
+        if (player == null) return;
+        player.moveDown(camera);
+    }
+
+    onLeftClick = () => {
+        if (player == null) return;
+        player.moveLeft(camera);
+    }
+
+    onRightClick = () => {
+        if (player == null) return;
+        player.moveRight(camera);
+    }
+
+    onStrikeClick = () => {
+        if (player == null) return;
+        player.strike();
+    }
+
     handleChange = (event) => {
         let resolutionWidth;
         let resolutions = Constants.Page.ResolutionWidths;
@@ -104,6 +130,7 @@ class App extends Component {
             <Helmet>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0 user-scalable=no" />
             </Helmet>
+            <Settings onChange={this.handleChange} />
             {!this.state.isPlaying &&
                 <ActionButtons
                     playButton={this.playButton}
@@ -111,7 +138,12 @@ class App extends Component {
                     refreshButton={this.refreshButton}
                     onRefreshClick={this.onRefreshClick} />
             }
-            <Settings onChange={this.handleChange} />
+            <ControlButtons
+                onUpClick={this.onUpClick}
+                onDownClick={this.onDownClick}
+                onLeftClick={this.onLeftClick}
+                onRightClick={this.onRightClick}
+                onStrikeClick={this.onStrikeClick} />
         </div>)
     }
 }
