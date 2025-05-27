@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/little-world/static/js/main.cc1c49e8.js",
+    "main.js": "/little-world/static/js/main.9421c12a.js",
     "index.html": "/little-world/index.html",
-    "main.cc1c49e8.js.map": "/little-world/static/js/main.cc1c49e8.js.map"
+    "main.9421c12a.js.map": "/little-world/static/js/main.9421c12a.js.map"
   },
   "entrypoints": [
-    "static/js/main.cc1c49e8.js"
+    "static/js/main.9421c12a.js"
   ]
 }
