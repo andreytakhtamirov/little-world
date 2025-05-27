@@ -36,7 +36,7 @@ class App extends Component {
             Constants.Page.ResolutionWidths.indexOf(parseInt(storedResolution)) !== -1) {
             Constants.Page.SetResolutionWidth = parseInt(storedResolution);
         } else {
-            Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[2]; // Set default to medium
+            Constants.Page.SetResolutionWidth = Constants.Page.ResolutionWidths[3]; // Set default to high
         }
     }
 
@@ -156,7 +156,7 @@ function setResolution(resolutionWidth) {
     let screenWidth = window.innerWidth * window.devicePixelRatio;
     Constants.Page.ResolutionRatio = resolutionWidth / screenWidth;
     renderer.setPixelRatio(Constants.Page.ResolutionRatio);
-    localStorage.setItem(Constants.Page.ResolutionStorageKey,resolutionWidth);
+    localStorage.setItem(Constants.Page.ResolutionStorageKey, resolutionWidth);
 }
 
 function purgeWorld(obj) {
@@ -212,16 +212,16 @@ function initializeWorld() {
                 worlds[i].mesh.position.set(0, -worldWidth, 0);
             } else if (i % 4 === 0) {
                 worlds[i].mesh.rotation.z = Utils.getRadians(270);
-                worlds[i].mesh.position.set(worldWidth/2, -worldDepth/2, 0);
+                worlds[i].mesh.position.set(worldWidth / 2, -worldDepth / 2, 0);
             } else if (i % 3 === 0) {
                 worlds[i].mesh.rotation.x = Utils.getRadians(90);
-                worlds[i].mesh.position.set(0, -worldWidth/2, worldWidth/2);
+                worlds[i].mesh.position.set(0, -worldWidth / 2, worldWidth / 2);
             } else if (i % 2 === 0) {
                 worlds[i].mesh.rotation.z = Utils.getRadians(90);
-                worlds[i].mesh.position.set(-worldWidth/2, -worldWidth/2, 0);
+                worlds[i].mesh.position.set(-worldWidth / 2, -worldWidth / 2, 0);
             } else if (i % 1 === 0) {
                 worlds[i].mesh.rotation.x = Utils.getRadians(270);
-                worlds[i].mesh.position.set(0, -worldWidth/2, -worldWidth/2);
+                worlds[i].mesh.position.set(0, -worldWidth / 2, -worldWidth / 2);
             }
             worlds[0].mesh.add(worlds[i].mesh);
         }
@@ -301,7 +301,7 @@ function initializeWorld() {
 function doesTreeTouchRiver(river, tree) {
     let treePosition = new THREE.Vector3();
     tree.mesh.getWorldPosition(treePosition);
-    
+
     const riverX = river.mesh.position.x;
     const riverZ = river.mesh.position.z;
     const riverDepth = river.mesh.geometry.parameters.depth;
@@ -311,8 +311,8 @@ function doesTreeTouchRiver(river, tree) {
     const treeWidth = tree.mesh.geometry.parameters.width;
 
     // The river has 2 orientations, it either lies on the X-axis or on the Z-axis (covering whole world width).
-    return (riverX !== 0 && treeX - treeWidth/2 <= riverX + riverDepth/2 && treeX + treeWidth/2 >= riverX - riverDepth/2) ||
-           (riverZ !== 0 && treeZ - treeWidth/2 <= riverZ + riverDepth/2 && treeZ + treeWidth/2 >= riverZ - riverDepth/2);
+    return (riverX !== 0 && treeX - treeWidth / 2 <= riverX + riverDepth / 2 && treeX + treeWidth / 2 >= riverX - riverDepth / 2) ||
+        (riverZ !== 0 && treeZ - treeWidth / 2 <= riverZ + riverDepth / 2 && treeZ + treeWidth / 2 >= riverZ - riverDepth / 2);
 }
 
 function startAnimationLoop() {

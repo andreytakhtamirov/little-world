@@ -1,7 +1,7 @@
 {
   "name": "little-world",
   "version": "0.1.0",
-  "homepage": "https://andreytakhtamirov.github.io",
+  "homepage": "https://andreytakhtamirov.github.io/little-world",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -16,13 +16,12 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "serve": "14.1.2",
     "three": "0.148.0",
     "web-vitals": "3.1.0"
   },
-  "scripts":
-   {
+  "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "start": "serve -s build",
@@ -48,6 +47,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1"
+    "gh-pages": "^6.3.0"
   }
 }
