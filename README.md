@@ -1,4 +1,4 @@
-Hosted at <https://inyourownlittleworld.ca>
+<https://andreytakhtamirov.github.io/little-world>
 
 ## Features
 
