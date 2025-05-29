@@ -368,10 +368,10 @@ function setCamera(isPlaying) {
 function loadPlayer() {
     let world = worlds[0];
     const mtlLoader = new MTLLoader();
-    mtlLoader.load("/models/beaver.vox.mtl", mtlParseResult => {
+    mtlLoader.load(`${process.env.PUBLIC_URL}/models/beaver.vox.mtl`, mtlParseResult => {
         const objLoader = new OBJLoader();
         objLoader.setMaterials(mtlParseResult);
-        objLoader.load("/models/beaver.vox.obj", function (obj) {
+        objLoader.load(`${process.env.PUBLIC_URL}/models/beaver.vox.obj`, function (obj) {
             obj.scale.set(1.1, 1.1, 1.1);
             obj.translateX(0);
             obj.translateY(world.mesh.geometry.parameters.height / 2);
